@@ -1,0 +1,117 @@
+<?php
+
+/**
+ * @file
+ * Contains lehigh_islandora.module.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\node\Entity\Node;
+
+/**
+ * Implements hook_help().
+ */
+function lehigh_islandora_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the lehigh_islandora module.
+    case 'help.page.lehigh_islandora':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('My Awesome Module') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_xmlsitemap_link_alter().
+ */
+function lehigh_islandora_xmlsitemap_link_alter(array &$link, array $context) {
+  $uri = $link['loc'];
+  if (substr($uri, 0, 6) == '/node/') {
+    $components = explode('/', $uri);
+    $nid = array_pop($components);
+    $node = Node::load($nid);
+
+    // Do not add pages to the sitemap.
+    if ($node
+      && $node->hasField('field_model')
+      && !$node->field_model->isEmpty()
+      && $node->field_model->entity->hasField('field_external_uri')
+      && !$node->field_model->entity->field_external_uri->isEmpty()
+      && $node->field_model->entity->field_external_uri->uri == 'http://id.loc.gov/ontologies/bibframe/part') {
+      $link['status'] = 0;
+      $link['access'] = 0;
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function lehigh_islandora_theme_registry_alter(array &$theme_registry) {
+  if (empty($theme_registry['media'])) {
+    return;
+  }
+
+  $module_path = \Drupal::service('extension.list.module')->getPath('lehigh_islandora');
+  $theme_registry['media__image__rest_url'] = $theme_registry['media'];
+  $theme_registry['media__image__rest_url']['template'] = 'media--image--rest-url';
+  $theme_registry['media__image__rest_url']['path'] = $module_path . '/templates';
+}
+
+/**
+ * Implements hook_metatags_attachments_alter().
+ */
+function lehigh_islandora_metatags_attachments_alter(array &$metatag_attachments) {
+  // See if the node, or one of the parents in the hierarchy,
+  // have google scholar metatags set to be hidden.
+  $node = \Drupal::routeMatch()->getParameter('node');
+  if ($node && is_object($node) && $node->bundle() === 'islandora_object') {
+    $depth = 0;
+    while ($depth < 10 && $node->hasField('field_hide_gscholar_metatags')) {
+      if (!$node->field_hide_gscholar_metatags->isEmpty()
+        && $node->field_hide_gscholar_metatags->value) {
+        // Metatags should be hidden for google scholar.
+        foreach ($metatag_attachments['#attached']['html_head'] as $id => $attachment) {
+          if (substr($attachment[1], 0, 9) == 'citation_') {
+            unset($metatag_attachments['#attached']['html_head'][$id]);
+          }
+        }
+        break;
+      }
+
+      // Avoid circular references causing infinite loops.
+      ++$depth;
+
+      // @todo use recursion for multi-valued field_member_of
+      // right now that isn't a thing here at Lehigh.
+      if ($node->hasField('field_member_of') && !$node->field_member_of->isEmpty()) {
+        $node = $node->field_member_of->entity;
+      }
+      else {
+        break;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function lehigh_islandora_media_insert(EntityInterface $media) {
+  if ($media->bundle() == 'image' &&
+    !$media->field_media_use->isEmpty() &&
+    !$media->field_media_of->isEmpty() &&
+    !is_null($media->field_media_of->entity) &&
+    !is_null($media->field_media_of->entity) &&
+    $media->field_media_use->entity->label() == 'Thumbnail Image') {
+    $node = Node::load($media->field_media_of->entity->id());
+    if ($node) {
+      $node->set('field_thumbnail', $media->id());
+      $node->save();
+    }
+  }
+}

@@ -1,0 +1,5 @@
+services:
+  encoder.mods:
+    class: Drupal\lehigh_islandora\Encoder\ModsEncoder
+    tags:
+      - { name: 'encoder', format: 'mods' }

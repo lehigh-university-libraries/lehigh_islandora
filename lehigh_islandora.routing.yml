@@ -1,0 +1,11 @@
+lehigh_islandora.legacy_redirect:
+  path: '/islandora/object/{pid}'
+  defaults:
+    _controller: '\Drupal\lehigh_islandora\Controller\LegacyRedirect::perform'
+    _title: 'Legacy Redirect'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      pid:
+        type: string
