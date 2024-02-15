@@ -1,0 +1,68 @@
+
+# Field instance.
+field.field_settings.textfield_attr:
+  type: mapping
+  label: Textfield with attributes field settings
+  mapping:
+    bar:
+      type: string
+      label: Bar
+
+# Default value.
+field.value.textfield_attr:
+  type: mapping
+  label: Default value
+  mapping:
+    attr0:
+      type: string
+      label: Attribute One
+    attr1:
+      type: string
+      label: Attribute Two
+    value:
+      type: string
+      label: Value
+
+# Field formatter.
+field.formatter.settings.textfield_attr_default:
+  type: mapping
+  label: Example formatter settings
+  mapping:
+    foo:
+      type: string
+      label: Foo
+
+field.field_settings.textarea_attr:
+  type: mapping
+  label: Textarea with attributes field settings
+  mapping:
+    bar:
+      type: string
+      label: Bar
+
+# Default value.
+field.value.textarea_attr:
+  type: mapping
+  label: Default value
+  mapping:
+    attr0:
+      type: string
+      label: Attribute One
+    attr1:
+      type: string
+      label: Attribute Two
+    value:
+      type: text
+      label: Value
+    format:
+      type: string
+      label: Format
+
+# Field formatter.
+field.formatter.settings.textarea_attr_default:
+  type: mapping
+  label: Example formatter settings
+  mapping:
+    foo:
+      type: string
+      label: Foo
