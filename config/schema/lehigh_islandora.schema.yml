@@ -1,12 +1,36 @@
-
 # Field instance.
 field.field_settings.textfield_attr:
   type: mapping
   label: Textfield with attributes field settings
   mapping:
-    bar:
+    attr0_values:
+      type: sequence
+      sequence:
+        type: label
+    attr1_values:
+      type: sequence
+      sequence:
+        type: label
+    attr0_name:
       type: string
-      label: Bar
+    attr1_name:
+      type: string
+field.field_settings.textarea_attr:
+  type: mapping
+  label: Textarea with attributes field settings
+  mapping:
+    attr0_values:
+      type: sequence
+      sequence:
+        type: label
+    attr1_values:
+      type: sequence
+      sequence:
+        type: label
+    attr0_name:
+      type: string
+    attr1_name:
+      type: string
 
 # Default value.
 field.value.textfield_attr:
@@ -22,25 +46,6 @@ field.value.textfield_attr:
     value:
       type: string
       label: Value
-
-# Field formatter.
-field.formatter.settings.textfield_attr_default:
-  type: mapping
-  label: Example formatter settings
-  mapping:
-    foo:
-      type: string
-      label: Foo
-
-field.field_settings.textarea_attr:
-  type: mapping
-  label: Textarea with attributes field settings
-  mapping:
-    bar:
-      type: string
-      label: Bar
-
-# Default value.
 field.value.textarea_attr:
   type: mapping
   label: Default value
@@ -59,10 +64,9 @@ field.value.textarea_attr:
       label: Format
 
 # Field formatter.
-field.formatter.settings.textarea_attr_default:
+field.formatter.settings.attr_default:
   type: mapping
-  label: Example formatter settings
+  label: Attr default formatter settings
   mapping:
-    foo:
-      type: string
-      label: Foo
+    override_label:
+      type: boolean

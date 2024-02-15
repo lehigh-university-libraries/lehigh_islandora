@@ -1,9 +1,4 @@
-textfield_attr:
+attr:
   css:
     component:
-      css/textfield-attr-widget.css: {}
-
-textarea_attr:
-  css:
-    component:
-      css/textarea-attr-widget.css: {}
+      css/attr-widget.css: {}

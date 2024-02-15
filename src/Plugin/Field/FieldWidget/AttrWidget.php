@@ -5,50 +5,54 @@ namespace Drupal\lehigh_islandora\Plugin\Field\FieldWidget;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\lehigh_islandora\Plugin\Field\FieldType\TextfieldWithAttributesItem;
+use Drupal\lehigh_islandora\Plugin\Field\FieldType\TextareaWithAttributesItem;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 
 /**
- * Defines the 'textfield_attr' field widget.
+ * Defines the 'textarea_attr' field widget.
  *
  * @FieldWidget(
- *   id = "textfield_attr",
- *   label = @Translation("Textfield with attributes"),
- *   field_types = {"textfield_attr"},
+ *   id = "attr_default",
+ *   label = @Translation("Textarea with attributes"),
+ *   field_types = {
+ *     "textarea_attr",
+ *     "textfield_attr"
+ *   },
  * )
  */
-final class TextfieldAttrWidget extends WidgetBase {
+final class AttrWidget extends WidgetBase {
 
   /**
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state): array {
-
+    $field_item = $items[$delta];
     $element['attr0'] = [
       '#type' => 'select',
-      '#title' => $this->t('Attribute One'),
-      '#options' => ['' => $this->t('- Select a value -')] + TextfieldWithAttributesItem::allowedAttributeOneValues(),
+      '#title' => $field_item->attributeOneName(),
+      '#options' => ['' => $this->t('- Select a value -')] + $field_item->allowedAttributeOneValues(),
       '#default_value' => $items[$delta]->attr0 ?? NULL,
     ];
 
-    $element['attr1'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Attribute Two'),
-      '#options' => ['' => $this->t('- None -')] + TextfieldWithAttributesItem::allowedAttributeTwoValues(),
-      '#default_value' => $items[$delta]->attr1 ?? NULL,
-    ];
+    $attr1_options = $field_item->allowedAttributeTwoValues();
+    if (count($attr1_options)) {
+      $element['attr1'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Attribute Two'),
+        '#options' => ['' => $this->t('- Select a value -')] + $attr1_options,
+        '#default_value' => $items[$delta]->attr1 ?? NULL,
+      ];
+    }
 
     $element['value'] = [
-      '#type' => 'textfield',
+      '#type' => get_class($field_item) == 'Drupal\lehigh_islandora\Plugin\Field\FieldType\TextareaAttrItem' ? 'textarea' : 'textfield',
       '#title' => $this->t('Value'),
       '#default_value' => $items[$delta]->value ?? NULL,
-      '#size' => 20,
     ];
 
     $element['#theme_wrappers'] = ['container', 'form_element'];
-    $element['#attributes']['class'][] = 'container-inline';
-    $element['#attributes']['class'][] = 'textfield-attr-elements';
-    $element['#attached']['library'][] = 'lehigh_islandora/textfield_attr';
+    $element['#attributes']['class'][] = 'attr-elements';
+    $element['#attached']['library'][] = 'lehigh_islandora/attr';
 
     return $element;
   }
@@ -78,6 +82,9 @@ final class TextfieldAttrWidget extends WidgetBase {
       }
       if ($value['value'] === '') {
         $values[$delta]['value'] = NULL;
+      }
+      if ($value['format'] === '') {
+        $values[$delta]['format'] = NULL;
       }
     }
     return $values;

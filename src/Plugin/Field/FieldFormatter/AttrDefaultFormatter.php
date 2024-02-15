@@ -5,34 +5,37 @@ namespace Drupal\lehigh_islandora\Plugin\Field\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\lehigh_islandora\Plugin\Field\FieldType\TextfieldWithAttributesItem;
+use Drupal\lehigh_islandora\Plugin\Field\FieldType\TextareaWithAttributesItem;
 
 /**
- * Plugin implementation of the 'textfield_attr_default' formatter.
+ * Plugin implementation of the 'textarea_attr_default' formatter.
  *
  * @FieldFormatter(
- *   id = "textfield_attr_default",
+ *   id = "attr_default",
  *   label = @Translation("Default"),
- *   field_types = {"textfield_attr"},
+ *   field_types = {
+ *     "textarea_attr",
+ *     "textfield_attr"
+ *   },
  * )
  */
-final class TextfieldAttrDefaultFormatter extends FormatterBase {
+final class AttrDefaultFormatter extends FormatterBase {
 
   /**
    * {@inheritdoc}
    */
   public static function defaultSettings(): array {
-    return ['foo' => 'bar'] + parent::defaultSettings();
+    return ['override_label' => FALSE] + parent::defaultSettings();
   }
 
   /**
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state): array {
-    $element['foo'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Foo'),
-      '#default_value' => $this->getSetting('foo'),
+    $element['override_label'] = [
+      '#type' => 'bool',
+      '#title' => $this->t('Override Label'),
+      '#default_value' => $this->getSetting('override_label'),
     ];
     return $element;
   }
@@ -42,7 +45,7 @@ final class TextfieldAttrDefaultFormatter extends FormatterBase {
    */
   public function settingsSummary(): array {
     return [
-      $this->t('Foo: @foo', ['@foo' => $this->getSetting('foo')]),
+      $this->t('Override label: @v', ['@v' => $this->getSetting('override_label')]),
     ];
   }
 
@@ -55,24 +58,31 @@ final class TextfieldAttrDefaultFormatter extends FormatterBase {
     foreach ($items as $delta => $item) {
 
       if ($item->attr0) {
-        $allowed_values = TextfieldWithAttributesItem::allowedAttributeOneValues();
+        $allowed_values = $item->allowedAttributeOneValues();
         $element[$delta]['attr0'] = [
           '#type' => 'item',
-          '#title' => $this->t('Attribute One'),
+          '#title' => $item->attributeOneName(),
           '#markup' => $allowed_values[$item->attr0],
         ];
       }
 
       if ($item->attr1) {
-        $allowed_values = TextfieldWithAttributesItem::allowedAttributeTwoValues();
+        $allowed_values = $item->allowedAttributeTwoValues();
         $element[$delta]['attr1'] = [
           '#type' => 'item',
-          '#title' => $this->t('Attribute Two'),
+          '#title' => $item->attributeTwoName(),
           '#markup' => $allowed_values[$item->attr1],
         ];
       }
 
-      if ($item->value) {
+      if ($item->format) {
+        $element[$delta]['format'] = [
+          '#type' => 'item',
+          '#title' => $this->t('Value'),
+          '#markup' => $item->value,
+        ];
+      }
+      else {
         $element[$delta]['value'] = [
           '#type' => 'item',
           '#title' => $this->t('Value'),
