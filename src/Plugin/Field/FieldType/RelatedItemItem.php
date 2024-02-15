@@ -85,7 +85,6 @@ final class RelatedItemItem extends FieldItemBase {
 
     $schema = [
       'columns' => $columns,
-      // @DCG Add indexes here if necessary.
     ];
 
     return $schema;
@@ -113,11 +112,11 @@ final class RelatedItemItem extends FieldItemBase {
    * Returns allowed values for 'identifier_type' sub-field.
    */
   public static function allowedIdentifierTypeValues(): array {
-    // @todo Update allowed values.
     return [
-      'alpha' => t('Alpha'),
-      'beta' => t('Beta'),
-      'gamma' => t('Gamma'),
+      'l-issn' => t('ISSN'),
+      'audio-file' => t('Audio File'),
+      'transcription-file' => t('Transcription File'),
+      'uri' => t('URI'),
     ];
   }
 
