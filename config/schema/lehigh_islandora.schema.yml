@@ -70,3 +70,22 @@ field.formatter.settings.attr_default:
   mapping:
     override_label:
       type: boolean
+
+
+# Default value.
+field.value.related_item:
+  type: mapping
+  label: Default value
+  mapping:
+    identifier:
+      type: string
+      label: Identifier
+    identifier_type:
+      type: string
+      label: Identifier Type
+    number:
+      type: string
+      label: Number
+    title:
+      type: string
+      label: Title

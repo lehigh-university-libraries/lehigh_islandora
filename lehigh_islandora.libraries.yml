@@ -2,3 +2,8 @@ attr:
   css:
     component:
       css/attr-widget.css: {}
+
+related_item:
+  css:
+    component:
+      css/related-item-widget.css: {}
