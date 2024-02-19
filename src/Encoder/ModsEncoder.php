@@ -111,18 +111,13 @@ class ModsEncoder extends XmlEncoder {
         $mods['physicalDescription']['form']['@valueURI'] = $entity->field_physical_description_uri->uri;
       }
     }
-    if (!$entity->field_description->isEmpty()) {
-      $mods['abstract'] = [
-        '@type' => 'abstract',
-        '#' => $entity->field_description->value,
-      ];
-    }
 
     $fields = [
+      'field_abstract'             => 'abstract',
       'field_resource_type'        => 'typeOfResource',
       'field_rights'               => 'accessCondition',
       'field_classification'       => 'classification',
-      "field_identifier"           =>  "identifier",
+      "field_identifier"           => "identifier",
       "field_note"                 => "note",
       "field_table_of_contents"    => "tableOfContents",
       "field_media_type"           => ["physicalDescription", "internetMediaType"],
@@ -155,7 +150,14 @@ class ModsEncoder extends XmlEncoder {
         foreach ($modsField as $subfield) {
           $tempModsField = &$tempModsField[$subfield];
         }
-        $tempModsField = is_null($entity->$field->entity) ? $entity->get($field)->getString() : $entity->$field->entity->label();
+        $value = [
+          "#" => is_null($entity->$field->entity) ? $entity->get($field)->getString() : $entity->$field->entity->label(),
+        ];
+        if (!empty($entity->$field->attr0)) {
+          // TODO: lookup field and get value for attr0 instead of assumming it's type
+          $value["@type"] = $entity->$field->attr0;
+        }
+        $tempModsField = $value;
       }
     }
 
