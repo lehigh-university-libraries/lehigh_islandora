@@ -8,6 +8,7 @@
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\node\Entity\Node;
+use Drupal\taxonomy\Entity\Term;
 
 /**
  * Implements hook_help().
@@ -114,4 +115,25 @@ function lehigh_islandora_media_insert(EntityInterface $media) {
       $node->save();
     }
   }
+}
+
+/**
+ * Helper function to fetch a taxonomy term by name/vocab.
+ */
+function lehigh_islandora_get_tid_by_name($name, $vid, $auto_create = FALSE) {
+  $tid = \Drupal::database()->query('SELECT tid FROM {taxonomy_term_field_data}
+    WHERE name = :name AND vid = :vid', [
+    ':vid' => $vid,
+    ':name' => $name,
+  ])->fetchField();
+  if (!$tid && $auto_create) {
+    $term = Term::create([
+      'vid' => $vid,
+      'name' => $name,
+    ]);
+    $term->save();
+    $tid = $term->id();
+  }
+
+  return $tid;
 }
