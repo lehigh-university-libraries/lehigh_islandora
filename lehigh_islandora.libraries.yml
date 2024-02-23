@@ -7,3 +7,8 @@ related_item:
   css:
     component:
       css/related-item-widget.css: {}
+
+hierarchical_geographic:
+  css:
+    component:
+      css/hierarchical-geographic-widget.css: {}

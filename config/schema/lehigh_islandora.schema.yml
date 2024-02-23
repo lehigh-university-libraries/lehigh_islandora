@@ -89,3 +89,43 @@ field.value.related_item:
     title:
       type: string
       label: Title
+
+
+# Default value.
+field.value.hierarchical_geographic:
+  type: mapping
+  label: Default value
+  mapping:
+    continent:
+      type: string
+      label: Continent
+    country:
+      type: string
+      label: Country
+    region:
+      type: string
+      label: Region
+    state:
+      type: string
+      label: State
+    territory:
+      type: string
+      label: Territory
+    county:
+      type: string
+      label: County
+    city:
+      type: string
+      label: City
+    city_section:
+      type: string
+      label: City Section
+    island:
+      type: string
+      label: island
+    area:
+      type: string
+      label: area
+    extraterrestrial_area:
+      type: string
+      label: Extraterrestrial Area
