@@ -102,16 +102,6 @@ class ModsEncoder extends XmlEncoder {
       }
     }
 
-    if (!$entity->field_physical_description->isEmpty()) {
-      $mods['physicalDescription']['form']['#'] = $entity->field_physical_description->value;
-      if (!$entity->field_physical_description_uri->isEmpty()) {
-        if (strpos($entity->field_physical_description_uri->uri, '/aat/') !== FALSE) {
-          $mods['physicalDescription']['form']['@authority'] = 'aat';
-        }
-        $mods['physicalDescription']['form']['@valueURI'] = $entity->field_physical_description_uri->uri;
-      }
-    }
-
     $fields = [
       'field_abstract'             => 'abstract',
       'field_resource_type'        => 'typeOfResource',
@@ -137,9 +127,6 @@ class ModsEncoder extends XmlEncoder {
       "field_place_published"      => ["originInfo", "place", "placeTerm"],
       "field_record_origin"        => ["recordInfo", "recordOrigin"],
       "field_physical_description" => ["physicalDescription", "note"],
-      "field_subject"              => ["subject", "topic"],
-      "field_geographic_subject"   => ["subject", "geographic"],
-      "field_subjects_name"        => ["subject", "name", "namePart"],
     ];
     foreach ($fields as $field => $modsField) {
       if (is_string($modsField)) {
@@ -159,6 +146,65 @@ class ModsEncoder extends XmlEncoder {
         }
         $tempModsField[] = $value;
       }
+    }
+
+    $fields = [
+      "field_subject",
+      "field_geographic_subject",
+      "field_subjects_name",
+    ];
+    foreach ($fields as $fieldName) {
+      foreach ($entity->$fieldName as $field) {
+        $subject = [];
+        if ($fieldName == 'field_subject') {
+          $subject['topic'] = [
+            "#" => $field->entity->label(),
+          ];
+        }
+        elseif ($fieldName == 'field_geographic_subject') {
+          $subject['geographic'] = [
+            "#" => $field->entity->label(),
+          ];
+          if ($field->entity->vid->value == 'geographic_naf') {
+            $subject['@authority'] = 'naf';
+          }
+          elseif ($field->entity->vid->value == 'geographic_local') {
+            $subject['@authority'] = 'local';
+          }
+        }
+        elseif ($fieldName == 'field_subjects_name') {
+          $subject['name']['namePart'] = [
+            "#" => $field->entity->label(),
+          ];
+        }
+        $mods['subject'][] = $subject;
+      }
+    }
+
+    if (!$entity->field_lcsh_topic->isEmpty()) {
+      foreach ($entity->field_lcsh_topic as $topic) {
+        $mods['subject'][] = [
+          'topic' => $topic->entity->label(),
+          '@authority' => 'lcsh',
+        ];
+      }
+    }
+    if (!$entity->field_subject_hierarchical_geo->isEmpty()) {    
+      $subject = ['@authority' => 'tgn'];                                                                                                 
+      $keys = [                                                                                                                           
+        'city',                                                                                                                           
+        'continent',                                                                                                                      
+        'country',                                                                                                                        
+        'county',                                                                                                                         
+        'state',                                                                                                                          
+        'territory',                                                                                                                      
+      ];                                                                                                                                  
+      foreach ($keys as $key) {                                                                                                           
+        if ($entity->field_subject_hierarchical_geo->$key != "") {                                                                        
+          $subject['hierarchicGeographic'][$key] = $entity->field_subject_hierarchical_geo->$key;                                         
+        }                                                                                                                                 
+      }                                                                                  
+      $mods['subject'][] = $subject;                                                                                                      
     }
 
     if (!$entity->field_edtf_date_issued->isEmpty()) {
@@ -182,3 +228,4 @@ class ModsEncoder extends XmlEncoder {
   }
 
 }
+
