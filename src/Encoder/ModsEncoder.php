@@ -142,22 +142,22 @@ class ModsEncoder extends XmlEncoder {
       "field_subjects_name"        => ["subject", "name", "namePart"],
     ];
     foreach ($fields as $field => $modsField) {
-      if (!$entity->$field->isEmpty()) {
-        if (is_string($modsField)) {
-          $modsField = [$modsField];
-        }
+      if (is_string($modsField)) {
+        $modsField = [$modsField];
+      }
+      foreach ($entity->$field as $field) {
         $tempModsField = &$mods;
         foreach ($modsField as $subfield) {
           $tempModsField = &$tempModsField[$subfield];
         }
         $value = [
-          "#" => is_null($entity->$field->entity) ? $entity->get($field)->getString() : $entity->$field->entity->label(),
+          "#" => is_null($field->entity) ? $field->value : $field->entity->label(),
         ];
-        if (!empty($entity->$field->attr0)) {
+        if (!empty($field->attr0)) {
           // TODO: lookup field and get value for attr0 instead of assumming it's type
-          $value["@type"] = $entity->$field->attr0;
+          $value["@type"] = $field->attr0;
         }
-        $tempModsField = $value;
+        $tempModsField[] = $value;
       }
     }
 
