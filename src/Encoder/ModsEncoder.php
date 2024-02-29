@@ -138,7 +138,7 @@ class ModsEncoder extends XmlEncoder {
           $tempModsField = &$tempModsField[$subfield];
         }
         $value = [
-          "#" => is_null($field->entity) ? $field->value : $field->entity->label(),
+          "#" => is_null($field->entity) ? htmlspecialchars_decode($field->value) : $field->entity->label(),
         ];
         if (!empty($field->attr0)) {
           // TODO: lookup field and get value for attr0 instead of assumming it's type
