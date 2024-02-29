@@ -189,24 +189,51 @@ class ModsEncoder extends XmlEncoder {
         ];
       }
     }
-    if (!$entity->field_subject_hierarchical_geo->isEmpty()) {    
-      $subject = ['@authority' => 'tgn'];                                                                                                 
-      $keys = [                                                                                                                           
-        'city',                                                                                                                           
-        'continent',                                                                                                                      
-        'country',                                                                                                                        
-        'county',                                                                                                                         
-        'state',                                                                                                                          
-        'territory',                                                                                                                      
-      ];                                                                                                                                  
-      foreach ($keys as $key) {                                                                                                           
-        if ($entity->field_subject_hierarchical_geo->$key != "") {                                                                        
-          $subject['hierarchicGeographic'][$key] = $entity->field_subject_hierarchical_geo->$key;                                         
-        }                                                                                                                                 
-      }                                                                                  
-      $mods['subject'][] = $subject;                                                                                                      
+    if (!$entity->field_subject_hierarchical_geo->isEmpty()) {
+      $subject = ['@authority' => 'tgn'];
+      $keys = [
+        'city',
+        'continent',
+        'country',
+        'county',
+        'state',
+        'territory',
+      ];
+      foreach ($keys as $key) {
+        if ($entity->field_subject_hierarchical_geo->$key != "") {
+          $subject['hierarchicGeographic'][$key] = $entity->field_subject_hierarchical_geo->$key;
+        }
+      }
+      $mods['subject'][] = $subject;
     }
 
+    if (!$entity->field_related_item->isEmpty()) {
+      $keys = [
+        'title',
+        'identifier_type',
+        'identifier',
+        'number',
+      ];
+      $relatedItem = [];
+      foreach ($keys as $key) {
+        if ($entity->field_related_item->$key != "") {
+          if ($key == 'title') {
+            $relatedItem['titleInfo']['title'] = $entity->field_related_item->$key;
+          }
+          elseif ($key == 'number') {
+            $relatedItem['part']['detail']['number'] = $entity->field_related_item->$key;
+          }
+          elseif ($key == 'identifier_type') {
+            $relatedItem['identifier']['@type'] = $entity->field_related_item->$key;
+
+          }
+          else {
+            $relatedItem[$key]['#'] = $entity->field_related_item->$key;
+          }
+        }
+      }
+      $mods['relatedItem'][] = $relatedItem;
+    }
     if (!$entity->field_edtf_date_issued->isEmpty()) {
       $date_str = !$entity->field_edtf_date_created->isEmpty() && strlen($entity->field_edtf_date_created->value) >  strlen($entity->field_edtf_date_issued->value) ?
         $entity->field_edtf_date_created->value : $entity->field_edtf_date_issued->value;
@@ -228,4 +255,3 @@ class ModsEncoder extends XmlEncoder {
   }
 
 }
-
