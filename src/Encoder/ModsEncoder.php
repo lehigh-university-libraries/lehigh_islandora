@@ -251,7 +251,10 @@ class ModsEncoder extends XmlEncoder {
 
     $xml = parent::encode($mods, $format, $context);
 
-    return $xml;
+    // transform html entities
+    // e.g. \u0026#xfffd; into a single character
+    // this is only being done ATM to match i7 encoding to allow comparing values more easily
+    return html_entity_decode($xml);
   }
 
 }
