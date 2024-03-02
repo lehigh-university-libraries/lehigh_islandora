@@ -5,20 +5,7 @@ namespace Drupal\lehigh_islandora\Plugin\Field\FieldType;
 use Drupal\Component\Utility\Random;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\TypedData\DataDefinition;
-
-use Drupal\Component\Utility\Html;
-use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\FocusFirstCommand;
-use Drupal\Core\Ajax\InsertCommand;
-use Drupal\Core\Form\OptGroup;
-use Drupal\Core\Render\Element;
-use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\TypedData\OptionsProviderInterface;
 
 /**
  * Plugin base class inherited by the attr field types.
@@ -29,7 +16,7 @@ abstract class AttrItemBase extends FieldItemBase {
    * {@inheritdoc}
    */
   public function isEmpty(): bool {
-    return $this->attr0 === NULL || $this->value === NULL;
+    return $this->value === NULL;
   }
 
   /**
@@ -122,6 +109,8 @@ abstract class AttrItemBase extends FieldItemBase {
           "uri" => "URI",
           "use-and-reproduction" => "Use and reproduction",
           "year" => "Year",
+          "start" => "Start",
+          "end" => "End",
         ],
         '#required' => $key == 0,
         '#states' => [
@@ -144,7 +133,6 @@ abstract class AttrItemBase extends FieldItemBase {
   public function getConstraints(): array {
     $constraints = parent::getConstraints();
 
-    $options['attr0']['NotBlank'] = [];
     $options['value']['NotBlank'] = [];
 
     $constraint_manager = \Drupal::typedDataManager()->getValidationConstraintManager();
