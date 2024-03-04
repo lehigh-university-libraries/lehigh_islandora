@@ -56,36 +56,26 @@ final class AttrDefaultFormatter extends FormatterBase {
     $element = [];
 
     foreach ($items as $delta => $item) {
-
+      $label = '';
+      $allowed_values = $item->possibleValues();
       if ($item->attr0) {
-        $allowed_values = $item->allowedAttributeOneValues();
-        $element[$delta]['attr0'] = [
-          '#type' => 'item',
-          '#title' => $item->attributeOneName(),
-          '#markup' => $allowed_values[$item->attr0],
-        ];
+        $label = isset($allowed_values[$item->attr0]) ? $allowed_values[$item->attr0] : $item->attr0;
       }
-
-      if ($item->attr1) {
-        $allowed_values = $item->allowedAttributeTwoValues();
-        $element[$delta]['attr1'] = [
-          '#type' => 'item',
-          '#title' => $item->attributeTwoName(),
-          '#markup' => $allowed_values[$item->attr1],
-        ];
+      elseif ($item->attr1) {
+        $label = isset($allowed_values[$item->attr1]) ? $allowed_values[$item->attr1] : $item->attr1;
       }
 
       if ($item->format) {
         $element[$delta]['format'] = [
           '#type' => 'item',
-          '#title' => $this->t('Value'),
+          '#title' => $this->t($label),
           '#markup' => $item->value,
         ];
       }
       else {
         $element[$delta]['value'] = [
           '#type' => 'item',
-          '#title' => $this->t('Value'),
+          '#title' => $this->t($label),
           '#markup' => $item->value,
         ];
       }
