@@ -138,7 +138,7 @@ class ModsEncoder extends XmlEncoder {
           $tempModsField = &$tempModsField[$subfield];
         }
         $value = [
-          "#" => is_null($field->entity) ? htmlspecialchars_decode($field->value) : $field->entity->label(),
+          "#" => is_null($field->entity) ? $field->value : $field->entity->label(),
         ];
         if (!empty($field->attr0)) {
           // TODO: lookup field and get value for attr0 instead of assumming it's type
@@ -201,7 +201,7 @@ class ModsEncoder extends XmlEncoder {
       ];
       foreach ($keys as $key) {
         if ($entity->field_subject_hierarchical_geo->$key != "") {
-          $subject['hierarchicGeographic'][$key] = $entity->field_subject_hierarchical_geo->$key;
+          $subject['hierarchicalGeographic'][$key] = $entity->field_subject_hierarchical_geo->$key;
         }
       }
       $mods['subject'][] = $subject;
@@ -251,10 +251,10 @@ class ModsEncoder extends XmlEncoder {
 
     $xml = parent::encode($mods, $format, $context);
 
-    // transform html entities
-    // e.g. \u0026#xfffd; into a single character
-    // this is only being done ATM to match i7 encoding to allow comparing values more easily
-    return html_entity_decode($xml);
+    // remove <![CDATA[ ]]> wrapper to match i7 MODS
+    $response = preg_replace('/<!\[CDATA\[(.*?)\]\]>/s', '$1', $xml);
+
+    return $response;
   }
 
 }
