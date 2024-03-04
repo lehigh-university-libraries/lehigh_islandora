@@ -249,6 +249,19 @@ class ModsEncoder extends XmlEncoder {
       ];
     }
 
+    $parts = [
+      'field_volume_number',
+      'field_issue_number',
+    ];
+    foreach ($parts as $part) {
+      foreach ($entity->$part as $field) {
+        $mods['part']['detail'][] = [
+          '@type' => $part == 'field_volume_number' ? 'volume' : 'issue',
+          'number' => $field->value,
+        ];
+      }
+    }
+
     $xml = parent::encode($mods, $format, $context);
 
     // remove <![CDATA[ ]]> wrapper to match i7 MODS
