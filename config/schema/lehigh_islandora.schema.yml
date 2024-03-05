@@ -129,3 +129,22 @@ field.value.hierarchical_geographic:
     extraterrestrial_area:
       type: string
       label: Extraterrestrial Area
+
+
+# Default value.
+field.value.part_detail:
+  type: mapping
+  label: Default value
+  mapping:
+    type:
+      type: string
+      label: Type
+    caption:
+      type: string
+      label: Caption
+    number:
+      type: string
+      label: Number
+    title:
+      type: string
+      label: Title

@@ -12,3 +12,8 @@ hierarchical_geographic:
   css:
     component:
       css/hierarchical-geographic-widget.css: {}
+
+part_detail:
+  css:
+    component:
+      css/part-detail-widget.css: {}
