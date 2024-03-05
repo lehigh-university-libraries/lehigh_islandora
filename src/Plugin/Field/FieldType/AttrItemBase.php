@@ -184,6 +184,10 @@ abstract class AttrItemBase extends FieldItemBase {
       "year" => "Year",
       "start" => "Start",
       "end" => "End",
+      "bytes" => "Bytes",
+      "dimensions" => "Dimensions",
+      "minutes" => "Minutes",
+      "page" => "Page",
     ];
   }
 
