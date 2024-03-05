@@ -128,11 +128,11 @@ class ModsEncoder extends XmlEncoder {
       "field_record_origin"        => ["recordInfo", "recordOrigin"],
       "field_physical_description" => ["physicalDescription", "note"],
     ];
-    foreach ($fields as $field => $modsField) {
+    foreach ($fields as $fieldName => $modsField) {
       if (is_string($modsField)) {
         $modsField = [$modsField];
       }
-      foreach ($entity->$field as $field) {
+      foreach ($entity->$fieldName as $field) {
         $tempModsField = &$mods;
         foreach ($modsField as $subfield) {
           $tempModsField = &$tempModsField[$subfield];
@@ -142,7 +142,16 @@ class ModsEncoder extends XmlEncoder {
         ];
         if (!empty($field->attr0)) {
           // TODO: lookup field and get value for attr0 instead of assumming it's type
-          $value["@type"] = $field->attr0;
+          if ($fieldName == 'field_extent') {
+            $value["@unit"] = $field->attr0;
+          }
+          else {
+            $value["@type"] = $field->attr0;
+          }
+        }
+        if (!empty($field->attr1)) {
+          // TODO: lookup field and get value for attr1 instead of assumming it's type
+          $value["@unit"] = $field->attr1;
         }
         $tempModsField[] = $value;
       }
@@ -234,6 +243,25 @@ class ModsEncoder extends XmlEncoder {
       }
       $mods['relatedItem'][] = $relatedItem;
     }
+    if (!$entity->field_part_detail->isEmpty()) {
+      $keys = [
+        'caption',
+        'number',
+        'title',
+      ];
+      foreach($entity->field_part_detail as $field) {
+        $partDetail = [];
+        foreach ($keys as $key) {
+          if ($field->$key != "") {
+            $partDetail[$key] = $field->$key;
+          }
+        }
+        if ($field->type != "") {
+          $partDetail['@type'] = $field->type;
+        }
+        $mods['part']['detail'][] = $partDetail;
+      }
+    }
     if (!$entity->field_edtf_date_issued->isEmpty()) {
       $date_str = !$entity->field_edtf_date_created->isEmpty() && strlen($entity->field_edtf_date_created->value) >  strlen($entity->field_edtf_date_issued->value) ?
         $entity->field_edtf_date_created->value : $entity->field_edtf_date_issued->value;
@@ -247,19 +275,6 @@ class ModsEncoder extends XmlEncoder {
         "#" => $date ? $date->format('Y') : $date_str,
         "@type" => "year",
       ];
-    }
-
-    $parts = [
-      'field_volume_number',
-      'field_issue_number',
-    ];
-    foreach ($parts as $part) {
-      foreach ($entity->$part as $field) {
-        $mods['part']['detail'][] = [
-          '@type' => $part == 'field_volume_number' ? 'volume' : 'issue',
-          'number' => $field->value,
-        ];
-      }
     }
 
     $xml = parent::encode($mods, $format, $context);
