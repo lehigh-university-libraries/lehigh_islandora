@@ -3,3 +3,7 @@ services:
     class: Drupal\lehigh_islandora\Encoder\ModsEncoder
     tags:
       - { name: 'encoder', format: 'mods' }
+  encoder.workbench_csv:
+    class: Drupal\lehigh_islandora\Encoder\WorkbenchCsvEncoder
+    tags:
+      - { name: 'encoder', format: 'workbench_csv' }
