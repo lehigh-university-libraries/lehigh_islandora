@@ -46,6 +46,8 @@ class WorkbenchCsvEncoder extends CsvEncoder {
       'vid',
       'langcode',
       'type',
+      'status',
+      'path',
       'revision_timestamp',
       'revision_uid',
       'revision_log',
@@ -75,7 +77,11 @@ class WorkbenchCsvEncoder extends CsvEncoder {
           if ($fieldName !== "field_member_of" && !empty($entity_storage[$entity_type])) {
             $entity = $entity_storage[$entity_type]->load($fieldValue['target_id']);
             if ($entity) {
-              $value = $entity->label();
+              // TODO only add if field settings have more than one bundle
+              $value = $entity->bundle() . ":" . $entity->label();
+              if (isset($fieldValue['rel_type'])) {
+                $value = $fieldValue['rel_type'] . ":" . $value;
+              }
             }
           }
           if ($value == '') {
