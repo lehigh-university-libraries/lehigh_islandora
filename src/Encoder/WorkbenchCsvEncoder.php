@@ -37,7 +37,7 @@ class WorkbenchCsvEncoder extends CsvEncoder {
     return parent::decode($data, $format, $context);
   }
 
-  public function getRow($data) {
+  public function getRow(array $data, array $multipleBundles, array $header = []) : array {
     $entity_type_manager = \Drupal::entityTypeManager();
     $entity_storage = [];
     $remove = [
@@ -65,6 +65,21 @@ class WorkbenchCsvEncoder extends CsvEncoder {
       unset($data[$field]);
     }
     $row = [];
+
+    // if the header from the first entity was passed
+    // make 100% sure the array we iterator over is in the same order
+    // as the first entity
+    if (count($header)) {
+      $newData = [];
+      foreach ($header as $column) {
+        if ($column == "node_id") {
+          $column = "nid";
+        }
+        $newData[$column] = $data[$column];
+      }
+      $data = $newData;
+    }
+
     foreach ($data as $fieldName => $fieldValues) {
       $cell = [];
       foreach ($fieldValues as $k => $fieldValue) {
@@ -77,8 +92,7 @@ class WorkbenchCsvEncoder extends CsvEncoder {
           if ($fieldName !== "field_member_of" && !empty($entity_storage[$entity_type])) {
             $entity = $entity_storage[$entity_type]->load($fieldValue['target_id']);
             if ($entity) {
-              // TODO only add if field settings have more than one bundle
-              $value = $entity->bundle() . ":" . $entity->label();
+              $value = in_array($fieldName, $multipleBundles) ? $entity->bundle() . ":" . $entity->label() : $entity->label();
               if (isset($fieldValue['rel_type'])) {
                 $value = $fieldValue['rel_type'] . ":" . $value;
               }
@@ -116,7 +130,20 @@ class WorkbenchCsvEncoder extends CsvEncoder {
    * {@inheritdoc}
    */
   public function encode($data, $format, array $context = []) : string { 
-    $row = $this->getRow($data);
+    // find which fields have multiple taxonomy vocabs to choose from
+    $multipleBundles = [];
+    if (!empty($data['nid'][0]['value'])) {
+      $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+      $node = $node_storage->load($data['nid'][0]['value']);
+      foreach($node as $fieldName => $values) {
+        $settings = $node->get($fieldName)->getSettings();
+        if (!empty($settings['handler_settings']['target_bundles']) && count($settings['handler_settings']['target_bundles']) > 1) {
+          $multipleBundles[] = $fieldName;
+        }
+      }
+    }
+
+    $row = $this->getRow($data, $multipleBundles);
     $header = array_keys($row);
     $rows = [
       $header,
@@ -128,11 +155,11 @@ class WorkbenchCsvEncoder extends CsvEncoder {
         ->condition('field_member_of', $row['node_id'])
         ->accessCheck(TRUE)
         ->execute();
-      $nodes =  \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($entity_ids);
+      $nodes =  $node_storage->loadMultiple($entity_ids);
       foreach ($nodes as $node) {
         $data = $serializer->serialize($node, 'json', ['plugin_id' => 'entity']);
         $data = json_decode($data, true);
-        $row = $this->getRow($data);
+        $row = $this->getRow($data, $multipleBundles, $header);
         $rows[] = array_values($row);
       }
     }
