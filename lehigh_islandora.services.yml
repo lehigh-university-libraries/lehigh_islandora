@@ -7,3 +7,8 @@ services:
     class: Drupal\lehigh_islandora\Encoder\WorkbenchCsvEncoder
     tags:
       - { name: 'encoder', format: 'workbench_csv' }
+  lehigh_islandora.cache_book_manifests:
+    class: Drupal\lehigh_islandora\EventSubscriber\CacheBookManifests
+    arguments: ['@config.factory']
+    tags:
+      - { name: event_subscriber }
