@@ -8,6 +8,7 @@
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\node\Entity\Node;
+use Drupal\pathauto\PathautoPatternInterface;
 use Drupal\taxonomy\Entity\Term;
 
 /**
@@ -45,6 +46,26 @@ function lehigh_islandora_xmlsitemap_link_alter(array &$link, array $context) {
       && $node->field_model->entity->field_external_uri->uri == 'http://id.loc.gov/ontologies/bibframe/part') {
       $link['status'] = 0;
       $link['access'] = 0;
+    }
+  }
+}
+
+
+/**
+ * Implements hook_pathauto_pattern_alter().
+ */
+function lehigh_islandora_pathauto_pattern_alter(PathautoPatternInterface $pattern, array $context) {
+  if (!empty($context['data']['node'])) {
+    $node = $context['data']['node'];
+
+    // Do not create aliases for pages.
+    if ($node
+      && $node->hasField('field_model')
+      && !$node->field_model->isEmpty()
+      && $node->field_model->entity->hasField('field_external_uri')
+      && !$node->field_model->entity->field_external_uri->isEmpty()
+      && $node->field_model->entity->field_external_uri->uri == 'http://id.loc.gov/ontologies/bibframe/part') {
+      $pattern->setPattern('');
     }
   }
 }
