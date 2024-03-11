@@ -8,7 +8,6 @@
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\node\Entity\Node;
-use Drupal\pathauto\PathautoPatternInterface;
 use Drupal\taxonomy\Entity\Term;
 
 /**
@@ -54,7 +53,7 @@ function lehigh_islandora_xmlsitemap_link_alter(array &$link, array $context) {
 /**
  * Implements hook_pathauto_pattern_alter().
  */
-function lehigh_islandora_pathauto_pattern_alter(PathautoPatternInterface $pattern, array $context) {
+function lehigh_islandora_pathauto_pattern_alter($pattern, array $context) {
   if (!empty($context['data']['node'])) {
     $node = $context['data']['node'];
 
