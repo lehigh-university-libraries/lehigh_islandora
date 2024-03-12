@@ -183,7 +183,7 @@ class ModsEncoder extends XmlEncoder {
         }
         elseif ($fieldName == 'field_subjects_name') {
           $subject['name']['namePart'] = [
-            "#" => $field->entity->label(),
+            "#" => is_null($field->entity) ? '' : $field->entity->label(),
           ];
         }
         $mods['subject'][] = $subject;
@@ -278,11 +278,7 @@ class ModsEncoder extends XmlEncoder {
     }
 
     $xml = parent::encode($mods, $format, $context);
-
-    // remove <![CDATA[ ]]> wrapper to match i7 MODS
-    $response = preg_replace('/<!\[CDATA\[(.*?)\]\]>/s', '$1', $xml);
-
-    return $response;
+    return $xml;
   }
 
 }
