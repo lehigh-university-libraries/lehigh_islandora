@@ -79,7 +79,7 @@ final class RelatedItemItem extends FieldItemBase {
       ],
       'title' => [
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 1024,
       ],
     ];
 
