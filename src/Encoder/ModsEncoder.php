@@ -53,45 +53,28 @@ class ModsEncoder extends XmlEncoder {
         ];
       }
       else {
+        $roleTerm = [
+          "#" => str_replace(['label:', 'relators:'], ['', ''], $agent->rel_type),
+        ];
+        if (strpos($agent->rel_type, "relators:") !== FALSE) {
+          $roleTerm += [
+            "@type" => "code",
+            "@authority" => "marcrelator",
+          ];
+        }
         $mods['name'][] = [
           'namePart' => $agent->entity->label(),
           'role' => [
             [
               'roleTerm' => [
-                [
-                  "#" => str_replace('relators:', '', $agent->rel_type),
-                  "@type" => "code",
-                  "@authority" => "marcrelator",
-                ],
-                [
-                  "#" => str_replace('relators:', '', $agent->rel_type),
-                  "@type" => "text",
-                  "@authority" => "marcrelator",
-                ],
+                $roleTerm
               ],
-            ],
-            [
-              'roleTerm' => ++$count,
             ],
           ],
         ];
       }
     }
 
-    foreach ($entity->field_department_name as $department) {
-      $mods['name'][] = [
-        "@type" => "corporate",
-        'namePart' => $department->entity->label(),
-        'role' => [
-          [
-            'roleTerm' => 'Department',
-          ],
-          [
-            'roleTerm' => ++$count,
-          ],
-        ],
-      ];
-    }
     if (!$entity->field_genre->isEmpty()) {
       $mods['genre']['#'] = $entity->field_genre->entity->label();
       if (!$entity->field_genre_uri->isEmpty()) {
