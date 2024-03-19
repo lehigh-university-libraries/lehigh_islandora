@@ -62,7 +62,7 @@ class ModsEncoder extends XmlEncoder {
             "@authority" => "marcrelator",
           ];
         }
-        $mods['name'][] = [
+        $name = [
           'namePart' => $agent->entity->label(),
           'role' => [
             [
@@ -72,6 +72,10 @@ class ModsEncoder extends XmlEncoder {
             ],
           ],
         ];
+        if ($agent->entity->bundle() == "corporate_body") {
+          $name['@type'] = 'corporate';
+        }
+        $mods['name'][] = $name;
       }
     }
 
