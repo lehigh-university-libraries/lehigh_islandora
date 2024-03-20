@@ -161,11 +161,11 @@ class ModsEncoder extends XmlEncoder {
           $subject['geographic'] = [
             "#" => $field->entity->label(),
           ];
-          if ($field->entity->vid->value == 'geographic_naf') {
-            $subject['@authority'] = 'naf';
+          if ($field->entity->bundle() == 'geographic_naf') {
+            $subject['geographic']['@authority'] = 'naf';
           }
-          elseif ($field->entity->vid->value == 'geographic_local') {
-            $subject['@authority'] = 'local';
+          elseif ($field->entity->bundle() == 'geographic_local') {
+            $subject['geographic']['@authority'] = 'local';
           }
         }
         elseif ($fieldName == 'field_subjects_name') {
