@@ -44,7 +44,12 @@ class ModsEncoder extends XmlEncoder {
       "@xmlns:xlink" => "http://www.w3.org/1999/xlink",
     ];
 
-    $mods['titleInfo'][]['title'] = $entity->field_full_title->isEmpty() ? $entity->label() : $entity->field_full_title->value;
+    $titleInfo = ['title' => $entity->field_full_title->isEmpty() ? $entity->label() : $entity->field_full_title->value];
+    if (!$entity->field_title_part_name->isEmpty()) {
+      $titleInfo['partName'] = $entity->field_title_part_name->value;
+    }
+    $mods['titleInfo'][] = $titleInfo;
+
     if (!$entity->field_alt_title->isEmpty()) {
       $mods['titleInfo'][] = [
         'title' => $entity->field_alt_title->value,
