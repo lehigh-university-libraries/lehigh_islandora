@@ -169,3 +169,20 @@ function lehigh_islandora_get_tid_by_name($name, $vid, $auto_create = FALSE) {
 
   return $tid;
 }
+
+/**
+ * Helper function to get the OCFL directory of a fcrepo object ID.
+ */
+function lehigh_islandora_get_ocfl_dir(string $objectId) : string {
+  $digest = hash('sha256', $objectId);
+  $tupleSize = 3;
+  $numberOfTuples = 3;
+  $path = "/fcrepo/";
+  for ($i = 0; $i < $numberOfTuples * $tupleSize; $i += $tupleSize) {
+    $tuple = substr($digest, $i, $tupleSize);
+    $path .= $tuple . "/";
+  }
+
+  $path .= $digest;
+  return $path;
+}
