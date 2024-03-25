@@ -221,25 +221,27 @@ class ModsEncoder extends XmlEncoder {
         'identifier',
         'number',
       ];
-      $relatedItem = [];
-      foreach ($keys as $key) {
-        if ($entity->field_related_item->$key != "") {
-          if ($key == 'title') {
-            $relatedItem['titleInfo']['title'] = $entity->field_related_item->$key;
-          }
-          elseif ($key == 'number') {
-            $relatedItem['part']['detail']['number'] = $entity->field_related_item->$key;
-          }
-          elseif ($key == 'identifier_type') {
-            $relatedItem['identifier']['@type'] = $entity->field_related_item->$key;
+      foreach ($entity->field_related_item as $item) {
+        $relatedItem = [];
+        foreach ($keys as $key) {
+          if ($item->$key != "") {
+            if ($key == 'title') {
+              $relatedItem['titleInfo']['title'] = $item->$key;
+            }
+            elseif ($key == 'number') {
+              $relatedItem['part']['detail']['number'] = $item->$key;
+            }
+            elseif ($key == 'identifier_type') {
+              $relatedItem['identifier']['@type'] = $item->$key;
 
-          }
-          else {
-            $relatedItem[$key]['#'] = $entity->field_related_item->$key;
+            }
+            else {
+              $relatedItem[$key]['#'] = $item->$key;
+            }
           }
         }
+        $mods['relatedItem'][] = $relatedItem;
       }
-      $mods['relatedItem'][] = $relatedItem;
     }
     if (!$entity->field_part_detail->isEmpty()) {
       $keys = [
@@ -280,3 +282,4 @@ class ModsEncoder extends XmlEncoder {
   }
 
 }
+
