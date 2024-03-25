@@ -45,10 +45,13 @@ final class AttrWidget extends WidgetBase {
     }
 
     $element['value'] = [
-      '#type' => get_class($field_item) == 'Drupal\lehigh_islandora\Plugin\Field\FieldType\TextareaAttrItem' ? 'textarea' : 'textfield',
+      '#type' => get_class($field_item) == 'Drupal\lehigh_islandora\Plugin\Field\FieldType\TextareaAttrItem' ? 'text_format' : 'textfield',
       '#title' => $this->t('Value'),
       '#default_value' => $items[$delta]->value ?? NULL,
     ];
+    if (!empty($items[$delta]->format)) {
+      $element['value']['#format'] = $items[$delta]->format;
+    }
 
     $element['#theme_wrappers'] = ['container', 'form_element'];
     $element['#attributes']['class'][] = 'attr-elements';

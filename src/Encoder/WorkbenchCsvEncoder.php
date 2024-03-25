@@ -102,7 +102,7 @@ class WorkbenchCsvEncoder extends CsvEncoder {
             $value = $fieldValue['target_id'];
           }
         }
-        elseif (isset($fieldValue['attr0'])) {
+        elseif (isset($fieldValue['attr0']) || isset($fieldValue['format'])) {
           $cleanValue = [];
           foreach ($fieldValue as $key => $value) {
             if (!is_null($value)) {
