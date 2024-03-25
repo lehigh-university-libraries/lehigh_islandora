@@ -128,6 +128,7 @@ abstract class AttrItemBase extends FieldItemBase {
       "accompanying-material" => "Accompanying Material",
       "activity" => "Activity",
       "annotation" => "Annotation",
+      "arxiv" => "arXiv ID",
       "audio-file" => "Audio File",
       "awards" => "Awards",
       "barcode" => "Barcode",
