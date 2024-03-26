@@ -165,7 +165,40 @@ class WorkbenchCsvEncoder extends CsvEncoder {
     }
 
     $context['no_headers'] = TRUE;
-    $csv = parent::encode($rows, 'csv', $context);
+
+    // assume all columns are empty
+    $empty_cell = [];
+    foreach ($header as $k => $v) {
+      $empty_cell[$k] = TRUE;
+    }
+
+    // mark columns that have a value in some row as non-empty
+    $first = TRUE;
+    foreach ($rows as $row) {
+      if ($first) {
+        $first = FALSE;
+        continue;
+      }
+      foreach ($row as $k => $cell) {
+        if (!empty($cell)) {
+          $empty_cell[$k] = FALSE;
+        }
+      }
+    }
+
+    // remove empty columns
+    $trimmed_rows = [];
+    foreach ($rows as $row) {
+      $trimmed_row = [];
+      foreach ($row as $k => $cell) {
+        if (!$empty_cell[$k]) {
+          $trimmed_row[] = $cell;
+        }
+      }
+      $trimmed_rows[] = $trimmed_row;
+    }
+
+    $csv = parent::encode($trimmed_rows, 'csv', $context);
 
     return $csv;
   }
