@@ -81,6 +81,9 @@ function lehigh_islandora_theme_registry_alter(array &$theme_registry) {
   $theme_registry['media__image__rest_url'] = $theme_registry['media'];
   $theme_registry['media__image__rest_url']['template'] = 'media--image--rest-url';
   $theme_registry['media__image__rest_url']['path'] = $module_path . '/templates';
+
+  $theme_registry['node_edit_form']['template'] = 'node-edit-form';
+  $theme_registry['node_edit_form']['path'] = $module_path . '/templates';
 }
 
 /**
