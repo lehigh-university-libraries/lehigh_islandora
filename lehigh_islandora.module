@@ -141,6 +141,53 @@ function lehigh_islandora_media_insert(EntityInterface $media) {
 }
 
 /**
+ * Implements hook_ENTITY_TYPE_update().
+ */
+function lehigh_islandora_node_update(EntityInterface $entity) {
+  lehigh_islandora_clear_disk_cache($entity);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete().
+ */
+function lehigh_islandora_node_delete(EntityInterface $entity) {
+  lehigh_islandora_clear_disk_cache($entity);
+}
+
+function lehigh_islandora_clear_disk_cache(EntityInterface $node) {
+  $filesystem = \Drupal::service('file_system');
+
+  // remove cached serialized JSON for workbench exports from disk
+  $json_cache = 'private://serialized/node/' . $node->id() . '.json';
+  $f = $filesystem->realpath($json_cache);
+  if (file_exists($f)) {
+    unlink($f);
+  }
+
+  // remove cached IIIF manifests from disk
+  // for this node and its parent
+  $base_dir = $filesystem->realpath('private://iiif');
+  $nids = [$node->id()];
+  if ($node->hasField('field_member_of')) {
+    foreach ($node->field_member_of as $parent) {
+      if (is_null($parent->entity)) {
+        continue;
+      }
+      $nids[] = $parent->entity->id();
+    }
+  }
+
+  foreach ($nids as $nid) {
+    $pattern = $base_dir . '/*/node/' . $node->id();
+    $directories = glob($pattern, GLOB_ONLYDIR);
+    foreach ($directories as $directory) {
+      array_map('unlink', glob("$directory/*.*"));
+      rmdir($directory);
+    }
+  }
+}
+
+/**
  * Helper function to fetch a taxonomy term by name/vocab.
  */
 function lehigh_islandora_get_tid_by_name($name, $vid, $auto_create = FALSE) {
