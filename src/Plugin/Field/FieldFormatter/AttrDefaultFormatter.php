@@ -66,7 +66,7 @@ final class AttrDefaultFormatter extends FormatterBase {
       }
 
       if ($item->format) {
-        $element[$delta]['format'] = [
+        $element[$delta]['value'] = [
           '#type' => 'processed_text',
           '#text' => $item->value,
           '#format' => $item->format,

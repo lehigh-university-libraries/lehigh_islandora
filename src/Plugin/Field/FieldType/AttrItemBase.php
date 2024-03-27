@@ -72,11 +72,6 @@ abstract class AttrItemBase extends FieldItemBase {
   public function getConstraints(): array {
     $constraints = parent::getConstraints();
 
-    $options['value']['NotBlank'] = [];
-
-    $constraint_manager = \Drupal::typedDataManager()->getValidationConstraintManager();
-    $constraints[] = $constraint_manager->create('ComplexData', $options);
-
     return $constraints;
   }
 
@@ -203,11 +198,12 @@ abstract class AttrItemBase extends FieldItemBase {
    * Returns allowed values for 'format' sub-field.
    */
   public static function allowedFormatValues(): array {
-    // @todo Update allowed values.
+    // @todo set dynamically
     return [
-      'alpha' => t('Alpha'),
-      'beta' => t('Beta'),
-      'gamma' => t('Gamma'),
+      'basic_html' => t('Basic HTML'),
+      'mathjax' => t('MathJAX'),
+      'full_html' => t('Full HTML'),
+      'restricted_html' => t('Restricted HTML')
     ];
   }
 }
