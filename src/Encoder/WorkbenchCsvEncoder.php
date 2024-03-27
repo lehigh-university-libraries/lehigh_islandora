@@ -2,6 +2,7 @@
 
 namespace Drupal\lehigh_islandora\Encoder;
 
+use Drupal\Core\File\FileSystemInterface;
 use Symfony\Component\Serializer\Encoder\CsvEncoder;
 
 /**
@@ -15,6 +16,20 @@ class WorkbenchCsvEncoder extends CsvEncoder {
    * @var string
    */
   protected $format = 'workbench_csv';
+
+  /**
+   * Serializer used to transform nodes to JSON.
+   *
+   * @var \Symfony\Component\Serializer\SerializerInterface
+   */
+  protected $serializer;
+
+  /**
+   * Serializer used to transform nodes to JSON.
+   *
+   * @var Drupal\Core\File\FileSystemInterface
+   */
+  protected $fileSystem;
 
   /**
    * {@inheritdoc}
@@ -149,18 +164,22 @@ class WorkbenchCsvEncoder extends CsvEncoder {
       $header,
       array_values($row),
     ];
+    $time = time();
     if (!empty($row['node_id'])) {
-      $serializer = \Drupal::service('serializer');
+      $this->serializer = \Drupal::service('serializer');
+      $this->fileSystem = \Drupal::service('file_system');
       $entity_ids = \Drupal::entityQuery('node')
         ->condition('field_member_of', $row['node_id'])
         ->accessCheck(TRUE)
         ->execute();
-      $nodes =  $node_storage->loadMultiple($entity_ids);
-      foreach ($nodes as $node) {
-        $data = $serializer->serialize($node, 'json', ['plugin_id' => 'entity']);
-        $data = json_decode($data, true);
-        $row = $this->getRow($data, $multipleBundles, $header);
-        $rows[] = array_values($row);
+      foreach (array_chunk($entity_ids, 100) as $chunk) {
+        $nodes = $node_storage->loadMultiple($chunk);
+        foreach ($nodes as $node) {
+          $data = $this->getNodeJson($node);
+          $data = json_decode($data, true);
+          $row = $this->getRow($data, $multipleBundles, $header);
+          $rows[] = array_values($row);
+        }
       }
     }
 
@@ -201,6 +220,25 @@ class WorkbenchCsvEncoder extends CsvEncoder {
     $csv = parent::encode($trimmed_rows, 'csv', $context);
 
     return $csv;
+  }
+
+  public function getNodeJson($node): string {
+    $cache_path = 'private://serialized/node/' . $node->id() . '.json';
+    $file_path = $this->fileSystem->realpath($cache_path);
+    if (file_exists($file_path)) {
+      return file_get_contents($file_path);
+    }
+
+    $base_dir = dirname($cache_path);
+    $this->fileSystem->prepareDirectory($base_dir, FileSystemInterface::CREATE_DIRECTORY);
+    $json = $this->serializer->serialize($node, 'json', ['plugin_id' => 'entity']);
+    $f = fopen($file_path, 'w');
+    if ($f) {
+      fwrite($f, $json);
+      fclose($f);
+    }
+
+    return $json;
   }
 
 }
