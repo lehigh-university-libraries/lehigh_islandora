@@ -223,7 +223,8 @@ class WorkbenchCsvEncoder extends CsvEncoder {
   }
 
   public function getNodeJson($node): string {
-    $cache_path = 'private://serialized/node/' . $node->id() . '.json';
+    $filename = $node->id() . '.json';
+    $cache_path = 'private://serialized/node/' . $filename;
     $file_path = $this->fileSystem->realpath($cache_path);
     if (file_exists($file_path)) {
       return file_get_contents($file_path);
@@ -232,6 +233,7 @@ class WorkbenchCsvEncoder extends CsvEncoder {
     $base_dir = dirname($cache_path);
     $this->fileSystem->prepareDirectory($base_dir, FileSystemInterface::CREATE_DIRECTORY);
     $json = $this->serializer->serialize($node, 'json', ['plugin_id' => 'entity']);
+    $file_path = $this->fileSystem->realpath($base_dir) . '/' . $filename;
     $f = fopen($file_path, 'w');
     if ($f) {
       fwrite($f, $json);
