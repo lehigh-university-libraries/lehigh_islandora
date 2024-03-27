@@ -75,6 +75,8 @@ class WorkbenchCsvEncoder extends CsvEncoder {
       'revision_translation_affected',
       'content_translation_source',
       'content_translation_outdated',
+      // TODO: make this configurable
+      'field_thumbnail',
     ];
     foreach ($remove as $field) {
       unset($data[$field]);
@@ -117,14 +119,20 @@ class WorkbenchCsvEncoder extends CsvEncoder {
             $value = $fieldValue['target_id'];
           }
         }
-        elseif (isset($fieldValue['attr0']) || isset($fieldValue['format'])) {
+        elseif (array_key_exists('attr0', $fieldValue)
+          || array_key_exists('format', $fieldValue)
+          || array_key_exists('identifier_type', $fieldValue)
+          || array_key_exists('caption', $fieldValue)
+          || array_key_exists('city', $fieldValue)) {
           $cleanValue = [];
           foreach ($fieldValue as $key => $value) {
             if (!is_null($value)) {
               $cleanValue[$key] = $value;
             }
           }
-          $value = json_encode($cleanValue);
+          if (count($cleanValue)) {
+            $value = json_encode($cleanValue);
+          }
         }
         elseif (isset($fieldValue['value'])) {
           $value = $fieldValue['value'];
@@ -182,7 +190,6 @@ class WorkbenchCsvEncoder extends CsvEncoder {
         }
       }
     }
-
     $context['no_headers'] = TRUE;
 
     // assume all columns are empty
