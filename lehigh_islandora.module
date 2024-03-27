@@ -141,6 +141,13 @@ function lehigh_islandora_media_insert(EntityInterface $media) {
 }
 
 /**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function lehigh_islandora_node_insert(EntityInterface $entity) {
+  lehigh_islandora_clear_disk_cache($entity);
+}
+
+/**
  * Implements hook_ENTITY_TYPE_update().
  */
 function lehigh_islandora_node_update(EntityInterface $entity) {
@@ -176,14 +183,9 @@ function lehigh_islandora_clear_disk_cache(EntityInterface $node) {
       $nids[] = $parent->entity->id();
     }
   }
-
   foreach ($nids as $nid) {
-    $pattern = $base_dir . '/*/node/' . $node->id();
-    $directories = glob($pattern, GLOB_ONLYDIR);
-    foreach ($directories as $directory) {
-      array_map('unlink', glob("$directory/*.*"));
-      rmdir($directory);
-    }
+    $pattern = $base_dir . '/*/node/' . $nid . '/*.*';
+    array_map('unlink', glob($pattern));
   }
 }
 
