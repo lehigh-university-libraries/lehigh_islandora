@@ -172,7 +172,6 @@ class WorkbenchCsvEncoder extends CsvEncoder {
       $header,
       array_values($row),
     ];
-    $time = time();
     if (!empty($row['node_id'])) {
       $this->serializer = \Drupal::service('serializer');
       $this->fileSystem = \Drupal::service('file_system');
