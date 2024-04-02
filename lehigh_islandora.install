@@ -1,0 +1,39 @@
+<?php
+
+use Drupal\node\Entity\Node;
+
+/**
+ * Move publisher linked agents to field_publisher.
+ */
+function lehigh_islandora_update_100101() {
+  $terms = \Drupal::database()->query("SELECT t.tid, t.name FROM {node__field_linked_agent}
+    INNER JOIN {taxonomy_term_field_data} t ON t.tid = field_linked_agent_target_id
+    WHERE field_linked_agent_rel_type = 'relators:pbl'
+    GROUP BY t.tid")->fetchAllKeyed();
+  
+  $nids = \Drupal::database()->query("SELECT entity_id FROM node__field_linked_agent
+    WHERE field_linked_agent_rel_type = 'relators:pbl'")->fetchCol();
+  foreach ($nids as $nid) {
+    $node = Node::load($nid);
+    $linked_agents = [];
+    $publishers = [];
+    foreach ($node->field_linked_agent as $agent) {
+      if ($agent->rel_type ==  'relators:pbl') {
+        $publishers[] = $terms[$agent->target_id];
+      }
+      else {
+        $linked_agents[] = [
+          'target_id' => $agent->target_id,
+          'rel_type' => $agent->rel_type,
+        ];
+      }
+    }
+    $node->set('field_linked_agent', $linked_agents);
+    $node->set('field_publisher', $publishers);
+    $node->setNewRevision(TRUE);
+    $node->setRevisionCreationTime(\Drupal::time()->getCurrentTime());
+    $node->setRevisionLogMessage('Moving publisher from field_linked_agent to field_publisher');
+    $node->setRevisionUserId(1);
+    $node->save();
+  }
+}
