@@ -56,47 +56,39 @@ class ModsEncoder extends XmlEncoder {
         '@type' => 'alternative',
       ];
     }
+
     $count = 0;
     foreach ($entity->field_linked_agent as $agent) {
-      if ($agent->rel_type == 'relators:pbl') {
-        $mods['originInfo'] = [
-          'publisher' => $agent->entity->label(),
+      $roleTerm = [
+        "#" => str_replace(['label:', 'relators:'], ['', ''], $agent->rel_type),
+      ];
+      if (strpos($agent->rel_type, "relators:") !== FALSE) {
+        $roleTerm += [
+          "@type" => "code",
+          "@authority" => "marcrelator",
         ];
       }
-      else {
-        $roleTerm = [
-          "#" => str_replace(['label:', 'relators:'], ['', ''], $agent->rel_type),
-        ];
-        if (strpos($agent->rel_type, "relators:") !== FALSE) {
-          $roleTerm += [
-            "@type" => "code",
-            "@authority" => "marcrelator",
-          ];
-        }
-        $name = [
-          'namePart' => $agent->entity->label(),
-          'role' => [
-            [
-              'roleTerm' => [
-                $roleTerm
-              ],
+      $name = [
+        'namePart' => $agent->entity->label(),
+        'role' => [
+          [
+            'roleTerm' => [
+              $roleTerm
             ],
           ],
-        ];
-        if ($agent->entity->bundle() == "corporate_body") {
-          $name['@type'] = 'corporate';
-        }
-        $mods['name'][] = $name;
+        ],
+      ];
+      if ($agent->entity->bundle() == "corporate_body") {
+        $name['@type'] = 'corporate';
       }
+      $mods['name'][] = $name;
     }
 
     if (!$entity->field_genre->isEmpty()) {
       $mods['genre']['#'] = $entity->field_genre->entity->label();
-      if (!$entity->field_genre_uri->isEmpty()) {
-        if (strpos($entity->field_genre_uri->uri, '/aat/') !== FALSE) {
-          $mods['genre']['@authority'] = 'aat';
-        }
-        $mods['genre']['@valueURI'] = $entity->field_genre_uri->uri;
+      if (!$entity->field_genre->entity->field_authority_link->isEmpty()) {
+        $mods['genre']['@authority'] = $entity->field_genre->entity->field_authority_link->source;
+        $mods['genre']['@valueURI'] = $entity->field_genre->entity->field_authority_link->uri;
       }
     }
 
@@ -111,6 +103,7 @@ class ModsEncoder extends XmlEncoder {
       "field_media_type"           => ["physicalDescription", "internetMediaType"],
       "field_language"             => ["language", "languageTerm"],
       "field_physical_location"    => ["location", "physicalLocation"],
+      'field_publisher'            => ["originInfo", "publisher"],
       "field_date_captured"        => ["originInfo", "dateCaptured"],
       "field_edtf_date_created"    => ["originInfo", "dateCreated"],
       "field_edtf_date_issued"     => ["originInfo", "dateIssued"],
