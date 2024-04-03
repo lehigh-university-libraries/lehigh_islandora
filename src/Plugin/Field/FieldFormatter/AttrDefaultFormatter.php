@@ -83,7 +83,7 @@ final class AttrDefaultFormatter extends FormatterBase {
             break;
           case 'arxiv':
             if (!filter_var($item->value, FILTER_VALIDATE_URL)) {
-              $item->value = 'http://arxiv.org/abs' . $item->value;
+              $item->value = 'https://arxiv.org/abs/' . $item->value;
             }
             $url = parse_url($item->value);
             $components = explode('/abs/', $url['path']);
