@@ -43,7 +43,7 @@ class LinkedAgentFacet extends EntityReferenceLabelFormatter {
       ];
 
       $url = Url::fromUri('internal:/browse', $options);
-      $url = $elements[$delta]['#url'] = $url;
+      $elements[$delta]['#url'] = $url;
     }
 
     return $elements;
