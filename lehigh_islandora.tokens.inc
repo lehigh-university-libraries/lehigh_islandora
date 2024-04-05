@@ -12,6 +12,10 @@ use Drupal\Core\Render\BubbleableMetadata;
  * Implements hook_token_info_alter().
  */
 function lehigh_islandora_token_info_alter(&$data) {
+  $data['tokens']['node']['parent-url'] = [
+    'name' => t("Parent URL"),
+    'description' => t("This node's parent's path alias."),
+  ];
   $data['tokens']['node']['lehigh_islandora_issued_ymd'] = [
     'name' => t("Issued Date YYYY/m/d"),
     'description' => t("This node's issue date in Google Scholar's desired format."),
@@ -81,6 +85,26 @@ function lehigh_islandora_tokens($type, $tokens, array $data, array $options, Bu
               }
             }
             $replacements[$original] = implode(',', $authors);
+          }
+          break;
+        case 'parent-url':
+          if ($node->hasField('field_member_of')
+            && !$node->field_member_of->isEmpty()) {
+            $paths = [
+              '/node/' . $node->field_member_of->target_id,
+              '/browse-items/' . $node->field_member_of->target_id,
+            ];
+            foreach ($paths as $path) {
+              $alias = \Drupal::database()->query('SELECT alias FROM {path_alias}
+                WHERE path = :path
+                AND status = 1', [
+                  ':path' => $path
+              ])->fetchField();
+              if ($alias) {
+                $replacements[$original] = $alias;
+                break;
+              }
+            }
           }
           break;
       }

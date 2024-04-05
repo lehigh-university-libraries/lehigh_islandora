@@ -9,6 +9,8 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\node\Entity\Node;
 use Drupal\taxonomy\Entity\Term;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
+use Drupal\views\ViewExecutable;
 
 /**
  * Implements hook_help().
@@ -65,6 +67,19 @@ function lehigh_islandora_pathauto_pattern_alter($pattern, array $context) {
       && !$node->field_model->entity->field_external_uri->isEmpty()
       && $node->field_model->entity->field_external_uri->uri == 'http://id.loc.gov/ontologies/bibframe/part') {
       $pattern->setPattern('');
+    }
+  }
+}
+
+/**
+ * Implements hook_pathauto_alias_alter().
+ */
+function lehigh_islandora_pathauto_alias_alter(&$alias, array &$context) {
+  if (!empty($context['data']['node'])) {
+    $node = $context['data']['node'];
+
+    if (lehigh_site_support_identify_collection($node)) {
+      $context['source'] = '/browse-items/' . $node->id();
     }
   }
 }
@@ -237,4 +252,45 @@ function lehigh_islandora_get_ocfl_dir(string $objectId) : string {
 
   $path .= $digest;
   return $path;
+}
+
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function lehigh_islandora_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
+  if ($view->id() == 'browse') {
+    if (isset($view->args[0])) {
+      $arg = (int)$view->args[0];
+    }
+    else {
+      $current_path = \Drupal::service('path.current')->getPath();
+      $current_path = ltrim($current_path, '/');
+      $path_parts = explode('/', $current_path);
+      if (isset($path_parts[1]) && is_numeric($path_parts[1])) {
+        $arg = (int)$path_parts[1];
+      }
+      else {
+        $arg = -1;
+      }
+    }
+
+    // /browse-items/-1 -> all non-collection items
+    // /browse-items/0 -> all collections
+    // /browse-items/\d+ -> all items in collection
+    $field_member_of = $arg ? [$arg] : [1, 2, 185];
+    if ($arg == 0) {
+      $query->addCondition('field_model', [27821, 23], 'IN');
+    }
+    elseif ($arg == -1) {
+      $query->addCondition('field_model', [27821, 23, 28], 'NOT IN');
+    }
+    else {
+      $query->addCondition('field_model', [28], 'NOT IN');
+    }
+
+    if ($field_member_of[0] != -1) {
+      $query->addCondition('field_member_of', $field_member_of, 'IN');
+    }
+  }
 }
