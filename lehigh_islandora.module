@@ -292,5 +292,18 @@ function lehigh_islandora_views_query_alter(ViewExecutable $view, QueryPluginBas
     if ($field_member_of[0] != -1) {
       $query->addCondition('field_member_of', $field_member_of, 'IN');
     }
+
+    if ($arg == 0) {
+      $query->sort('title');
+    }
+    elseif ($arg > 0) {
+      $sort = \Drupal::database()->query('SELECT field_sort_by_value FROM {node__field_sort_by} WHERE entity_id = :id', [':id' => $arg])->fetchField();
+      if ($sort) {
+        $components = explode('_', $sort);
+        $direction = array_pop($components);
+        $sort_by = implode('_', $components);
+        $query->sort($sort_by, $direction);
+      }
+    }
   }
 }
