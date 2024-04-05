@@ -54,7 +54,7 @@ final class RedirectCollections implements EventSubscriberInterface {
       if (lehigh_site_support_identify_collection($node)) {
         $url = Url::fromRoute('view.browse.main', ['node' => $node->id()]);
         $redirect = new RedirectResponse($url->toString());
-        $redirect->send();
+        $event->setResponse($redirect);
       }
     }
   }
