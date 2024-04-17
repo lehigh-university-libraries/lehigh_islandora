@@ -24,7 +24,7 @@ final class Uriports implements EventSubscriberInterface {
         return;
     }
   
-    $response = $event->getRespone();
+    $response = $event->getResponse();
     $response->headers->set('Report-To', '{"group":"default","max_age":10886400,"endpoints":[{"url":"https://ccssq3ur.uriports.com/reports"}],"include_subdomains":true}');
     $response->headers->set('Reporting-Endpoints', 'default="https://ccssq3ur.uriports.com/reports"');
     $response->headers->set('NEL', '{"report_to":"default","max_age":2592000,"include_subdomains":true,"failure_fraction":1.0}');
