@@ -17,3 +17,8 @@ services:
     arguments: ['@config.factory']
     tags:
       - { name: event_subscriber }
+  lehigh_islandora.uriports:
+    class: Drupal\lehigh_islandora\EventSubscriber\Uriports
+    arguments: ['@config.factory']
+    tags:
+      - { name: event_subscriber }

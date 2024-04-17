@@ -62,9 +62,11 @@ class Uriports extends ReportingHandlerBase {
    * {@inheritdoc}
    */
   public function alterPolicy(Csp $policy) {
+    $type = $this->configuration['type'] == 'report-only' ? 'report' : 'enforce';
+
     $policy->setDirective(
       'report-uri',
-      'https://' . $this->configuration['subdomain'] . '.uriports.com/reports'
+      'https://' . $this->configuration['subdomain'] . '.uriports.com/reports/' . $type
     );
   }
 
