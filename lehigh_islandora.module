@@ -156,6 +156,41 @@ function lehigh_islandora_media_insert(EntityInterface $media) {
 }
 
 /**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function lehigh_islandora_node_presave(EntityInterface $node) {
+  if ($node->hasField('field_collection_hierarchy')) {
+    $collection_hierarchy = [];
+    lehigh_islandora_get_collection_hierarchy($node, $collection_hierarchy);
+    $node->set('field_collection_hierarchy', $collection_hierarchy);
+  }
+}
+
+/**
+ * Helper function to populate all parent nodes this node descends from.
+ */
+function lehigh_islandora_get_collection_hierarchy($node, &$collection_hierarchy) {
+  if (!$node->hasField('field_member_of')) {
+    return;
+  }
+
+  foreach ($node->field_member_of as $parent) {
+    $pnid = $parent->entity->id();
+
+    // avoid infinite loops
+    if (in_array($pnid, $collection_hierarchy)) {
+      continue;
+    }
+    $collection_hierarchy[] = $pnid;
+
+    // unlikely but protect against self reference
+    if ($pnid != $node->id()) {
+      lehigh_islandora_get_collection_hierarchy($parent->entity, $collection_hierarchy);
+    }
+  }
+}
+
+/**
  * Implements hook_ENTITY_TYPE_insert().
  */
 function lehigh_islandora_node_insert(EntityInterface $entity) {
