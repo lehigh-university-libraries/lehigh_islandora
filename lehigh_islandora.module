@@ -101,6 +101,21 @@ function lehigh_islandora_theme_registry_alter(array &$theme_registry) {
   $theme_registry['node_edit_form']['path'] = $module_path . '/templates';
 }
 
+function lehigh_islandora_node_is_embargoed($node) {
+  $storage = \Drupal::entityTypeManager()->getStorage('embargo');
+  $embargoes = $storage->getApplicableEmbargoes($node);
+  if (count($embargoes)) {
+    foreach ($embargoes as $embargo) {
+      $d = $embargo->getExpirationDate();
+      if ($d->getTimestamp() > time()) {
+        return $d;
+      }
+    }
+  }
+
+  return FALSE;
+}
+
 /**
  * Implements hook_metatags_attachments_alter().
  */
@@ -110,6 +125,13 @@ function lehigh_islandora_metatags_attachments_alter(array &$metatag_attachments
   $node = \Drupal::routeMatch()->getParameter('node');
   if ($node && is_object($node) && $node->bundle() === 'islandora_object') {
     $depth = 0;
+    if (lehigh_islandora_node_is_embargoed($node)) {
+      foreach ($metatag_attachments['#attached']['html_head'] as $id => $attachment) {
+        if ($attachment[1] == 'citation_pdf_url') {
+          unset($metatag_attachments['#attached']['html_head'][$id]);
+        }
+      }
+    }
     while ($depth < 10 && $node->hasField('field_hide_gscholar_metatags')) {
       if (!$node->field_hide_gscholar_metatags->isEmpty()
         && $node->field_hide_gscholar_metatags->value) {
@@ -290,7 +312,7 @@ function lehigh_islandora_views_query_alter(ViewExecutable $view, QueryPluginBas
     }
 
     if ($field_member_of[0] != -1) {
-      $query->addCondition('field_member_of', $field_member_of, 'IN');
+      $query->addCondition('field_descendant_of', $field_member_of, 'IN');
     }
 
     if ($arg == 0) {
