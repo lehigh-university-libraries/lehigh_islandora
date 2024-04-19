@@ -297,28 +297,41 @@ function lehigh_islandora_views_query_alter(ViewExecutable $view, QueryPluginBas
       }
     }
 
+    // get the term IDs we filter on
+    $models = [
+      'collection' => lehigh_islandora_get_tid_by_name('Collection', 'islandora_models'),
+      'sub-collection' => lehigh_islandora_get_tid_by_name('Sub-Collection', 'islandora_models'),
+      'page' => lehigh_islandora_get_tid_by_name('Page', 'islandora_models'),
+    ];
+
+
     // /browse-items/-1 -> all non-collection items
-    // /browse-items/0 -> all collections
-    // /browse-items/\d+ -> all items in collection
-    $field_member_of = $arg ? [$arg] : [1, 2, 185];
-    if ($arg == 0) {
-      $query->addCondition('field_model', [27821, 23], 'IN');
+    // browse all items
+    if ($arg == -1) {
+      $query->addCondition('field_model', array_values($models), 'NOT IN');
     }
-    elseif ($arg == -1) {
-      $query->addCondition('field_model', [27821, 23, 28], 'NOT IN');
-    }
-    else {
-      $query->addCondition('field_model', [28], 'NOT IN');
-    }
+    // /browse-items/0
+    // browse all collections
+    elseif ($arg == 0) {
+      $query->addCondition('field_model', [
+        $models['collection'],
+        $models['sub-collection']
+      ], 'IN');
 
-    if ($field_member_of[0] != -1) {
-      $query->addCondition('field_descendant_of', $field_member_of, 'IN');
-    }
-
-    if ($arg == 0) {
+      $query->addCondition('field_member_of', [1, 2, 185], 'IN');
       $query->sort('title');
     }
-    elseif ($arg > 0) {
+    // browse a specific collection
+    // /browse-items/([1-9]([0-9]+)?) -> all items in collection
+    else {
+      $query->addCondition('field_model', [$models['page']], 'NOT IN');
+
+      // search all sub collections
+      // otherwise only show direct descendants
+      $field = empty($_GET['search_api_fulltext']) ? 'field_member_of' : 'field_descendant_of';
+      $query->addCondition($field, [$arg], 'IN');
+
+      // see if there's a custom sort on this collection
       $sort = \Drupal::database()->query('SELECT field_sort_by_value FROM {node__field_sort_by} WHERE entity_id = :id', [':id' => $arg])->fetchField();
       if ($sort) {
         $components = explode('_', $sort);
