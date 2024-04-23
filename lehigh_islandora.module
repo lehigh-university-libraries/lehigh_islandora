@@ -132,7 +132,7 @@ function lehigh_islandora_metatags_attachments_alter(array &$metatag_attachments
         }
       }
     }
-    while ($depth < 10 && $node->hasField('field_hide_gscholar_metatags')) {
+    while ($depth < 20 && $node->hasField('field_hide_gscholar_metatags')) {
       if (!$node->field_hide_gscholar_metatags->isEmpty()
         && $node->field_hide_gscholar_metatags->value) {
         // Metatags should be hidden for google scholar.
@@ -157,6 +157,33 @@ function lehigh_islandora_metatags_attachments_alter(array &$metatag_attachments
       }
     }
   }
+}
+
+/**
+ * See if hOCR should be hidden on display.
+ */
+function lehigh_islandora_hide_hocr($node) {
+  $depth = 0;
+  while ($depth < 20 && $node->hasField('field_hide_hocr')) {
+    if (!$node->field_hide_hocr->isEmpty()
+      && $node->field_hide_hocr->value) {
+      return TRUE;
+    }
+
+    // Avoid circular references causing infinite loops.
+    ++$depth;
+
+    // @todo use recursion for multi-valued field_member_of
+    // right now that isn't a thing here at Lehigh.
+    if ($node->hasField('field_member_of') && !$node->field_member_of->isEmpty()) {
+      $node = $node->field_member_of->entity;
+    }
+    else {
+      break;
+    }
+  }
+
+  return FALSE;
 }
 
 /**
