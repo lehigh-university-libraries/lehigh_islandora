@@ -45,10 +45,10 @@ function lehigh_islandora_update_100101() {
  * Carry forward bepress and contentdm redirects from i7.
  */
 function lehigh_islandora_update_100102() {
-  $uris = \Drupal::database()->query("SELECT bepress_url AS source, CONCAT('internal:/node/', p.entity_id) AS target
+  $bepress_uris = \Drupal::database()->query("SELECT bepress_url AS source, CONCAT('internal:/node/', p.entity_id) AS target
     FROM _i7_redirects
     INNER JOIN node__field_pid p ON field_pid_value = REPLACE(SUBSTRING_INDEX(islandora_url, '/', -1), '%3A', ':')");
-  foreach ($uris as $uri) {
+  foreach ($bepress_uris as $uri) {
     // just make the old redirects we had a relative path
     $uri->source = str_replace('https:', 'http:', $uri->source);
     $uri->source = str_replace('http://preserve.lehigh.edu/', '', $uri->source);
@@ -68,4 +68,23 @@ function lehigh_islandora_update_100102() {
     ]);
     $redirect->save();
   }
+
+  $cdm_uris = \Drupal::database()->query("SELECT REPLACE(cdm_url, 'http://cdm.lib.lehigh.edu/', '') AS source, CONCAT('internal:/node/', p.entity_id) AS target
+    FROM _cdm_redirects r
+    INNER JOIN node__field_pid p ON field_pid_value = REPLACE(SUBSTRING_INDEX(islandora_url, '/', -1), '%3A', ':')");
+  foreach ($cdm_uris as $uri) {
+    // add the redirect so we can delete them easily if/when we need to
+    $url = UrlHelper::parse($uri->source);
+    $source = [
+      'path' => trim($url['path']),
+      'query' => [],
+    ];
+    $redirect = Redirect::create([
+      'redirect_source' => $source,
+      'redirect_redirect' => $uri->target,
+      'status_code' => 301,
+    ]);
+    $redirect->save();
+  }
+
 }
