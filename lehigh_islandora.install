@@ -1,6 +1,8 @@
 <?php
 
 use Drupal\node\Entity\Node;
+use Drupal\redirect\Entity\Redirect;
+use Drupal\Component\Utility\UrlHelper;
 
 /**
  * Move publisher linked agents to field_publisher.
@@ -35,5 +37,35 @@ function lehigh_islandora_update_100101() {
     $node->setRevisionLogMessage('Moving publisher from field_linked_agent to field_publisher');
     $node->setRevisionUserId(1);
     $node->save();
+  }
+}
+
+
+/**
+ * Carry forward bepress and contentdm redirects from i7.
+ */
+function lehigh_islandora_update_100102() {
+  $uris = \Drupal::database()->query("SELECT bepress_url AS source, CONCAT('internal:/node/', p.entity_id) AS target
+    FROM _i7_redirects
+    INNER JOIN node__field_pid p ON field_pid_value = REPLACE(SUBSTRING_INDEX(islandora_url, '/', -1), '%3A', ':')");
+  foreach ($uris as $uri) {
+    // just make the old redirects we had a relative path
+    $uri->source = str_replace('https:', 'http:', $uri->source);
+    $uri->source = str_replace('http://preserve.lehigh.edu/', '', $uri->source);
+    // fix bepress cgi URLs
+    $uri->source = str_replace('&amp;', '&', $uri->source);
+
+    // add the redirect so we can delete them easily if/when we need to
+    $url = UrlHelper::parse($uri->source);
+    $source = [
+      'path' => trim($url['path']),
+      'query' => $url['query'] ?? [],
+    ];
+    $redirect = Redirect::create([
+      'redirect_source' => $source,
+      'redirect_redirect' => $uri->target,
+      'status_code' => 301,
+    ]);
+    $redirect->save();
   }
 }
