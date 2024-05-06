@@ -52,6 +52,9 @@ class WorkbenchCsvEncoder extends CsvEncoder {
     return parent::decode($data, $format, $context);
   }
 
+  /**
+   *
+   */
   public function getRow(array $data, array $multipleBundles, array $header = []) : array {
     $entity_type_manager = \Drupal::entityTypeManager();
     $entity_storage = [];
@@ -75,7 +78,7 @@ class WorkbenchCsvEncoder extends CsvEncoder {
       'revision_translation_affected',
       'content_translation_source',
       'content_translation_outdated',
-      // TODO: make this configurable
+      // @todo make this configurable
       'field_thumbnail',
     ];
     foreach ($remove as $field) {
@@ -83,9 +86,9 @@ class WorkbenchCsvEncoder extends CsvEncoder {
     }
     $row = [];
 
-    // if the header from the first entity was passed
+    // If the header from the first entity was passed
     // make 100% sure the array we iterator over is in the same order
-    // as the first entity
+    // as the first entity.
     if (count($header)) {
       $newData = [];
       foreach ($header as $column) {
@@ -120,10 +123,11 @@ class WorkbenchCsvEncoder extends CsvEncoder {
           }
         }
         elseif (array_key_exists('attr0', $fieldValue)
-          || array_key_exists('format', $fieldValue)
-          || array_key_exists('identifier_type', $fieldValue)
-          || array_key_exists('caption', $fieldValue)
-          || array_key_exists('city', $fieldValue)) {
+              || array_key_exists('format', $fieldValue)
+              || array_key_exists('identifier_type', $fieldValue)
+              || array_key_exists('caption', $fieldValue)
+              || array_key_exists('city', $fieldValue)
+          ) {
           $cleanValue = [];
           foreach ($fieldValue as $key => $value) {
             if (!is_null($value)) {
@@ -152,13 +156,13 @@ class WorkbenchCsvEncoder extends CsvEncoder {
   /**
    * {@inheritdoc}
    */
-  public function encode($data, $format, array $context = []) : string { 
-    // find which fields have multiple taxonomy vocabs to choose from
+  public function encode($data, $format, array $context = []) : string {
+    // Find which fields have multiple taxonomy vocabs to choose from.
     $multipleBundles = [];
     if (!empty($data['nid'][0]['value'])) {
       $node_storage = \Drupal::entityTypeManager()->getStorage('node');
       $node = $node_storage->load($data['nid'][0]['value']);
-      foreach($node as $fieldName => $values) {
+      foreach ($node as $fieldName => $values) {
         $settings = $node->get($fieldName)->getSettings();
         if (!empty($settings['handler_settings']['target_bundles']) && count($settings['handler_settings']['target_bundles']) > 1) {
           $multipleBundles[] = $fieldName;
@@ -183,7 +187,7 @@ class WorkbenchCsvEncoder extends CsvEncoder {
         $nodes = $node_storage->loadMultiple($chunk);
         foreach ($nodes as $node) {
           $data = $this->getNodeJson($node);
-          $data = json_decode($data, true);
+          $data = json_decode($data, TRUE);
           $row = $this->getRow($data, $multipleBundles, $header);
           $rows[] = array_values($row);
         }
@@ -191,13 +195,13 @@ class WorkbenchCsvEncoder extends CsvEncoder {
     }
     $context['no_headers'] = TRUE;
 
-    // assume all columns are empty
+    // Assume all columns are empty.
     $empty_cell = [];
     foreach ($header as $k => $v) {
       $empty_cell[$k] = TRUE;
     }
 
-    // mark columns that have a value in some row as non-empty
+    // Mark columns that have a value in some row as non-empty.
     $first = TRUE;
     foreach ($rows as $row) {
       if ($first) {
@@ -211,7 +215,7 @@ class WorkbenchCsvEncoder extends CsvEncoder {
       }
     }
 
-    // remove empty columns
+    // Remove empty columns.
     $trimmed_rows = [];
     foreach ($rows as $row) {
       $trimmed_row = [];
@@ -228,6 +232,9 @@ class WorkbenchCsvEncoder extends CsvEncoder {
     return $csv;
   }
 
+  /**
+   *
+   */
   public function getNodeJson($node): string {
     $filename = $node->id() . '.json';
     $cache_path = 'private://serialized/node/' . $filename;

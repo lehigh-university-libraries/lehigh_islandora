@@ -2,7 +2,6 @@
 
 namespace Drupal\lehigh_islandora\Plugin\Block;
 
-use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Menu\LocalTaskManagerInterface;
@@ -49,11 +48,11 @@ class CollectionTasks extends BlockBase implements ContainerFactoryPluginInterfa
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('plugin.manager.menu.local_task')
-    );
+          $configuration,
+          $plugin_id,
+          $plugin_definition,
+          $container->get('plugin.manager.menu.local_task')
+      );
   }
 
   /**

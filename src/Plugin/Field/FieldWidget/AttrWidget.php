@@ -1,11 +1,12 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Drupal\lehigh_islandora\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\lehigh_islandora\Plugin\Field\FieldType\TextareaWithAttributesItem;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 
 /**

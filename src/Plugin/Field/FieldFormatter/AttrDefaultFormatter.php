@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Drupal\lehigh_islandora\Plugin\Field\FieldFormatter;
 
@@ -58,10 +60,10 @@ final class AttrDefaultFormatter extends FormatterBase {
       $label = '';
       $allowed_values = $item->possibleValues();
       if ($item->attr0) {
-        $label = isset($allowed_values[$item->attr0]) ? $allowed_values[$item->attr0] : $item->attr0;
+        $label = $allowed_values[$item->attr0] ?? $item->attr0;
       }
       elseif ($item->attr1) {
-        $label = isset($allowed_values[$item->attr1]) ? $allowed_values[$item->attr1] : $item->attr1;
+        $label = $allowed_values[$item->attr1] ?? $item->attr1;
       }
 
       if ($item->format) {
@@ -79,8 +81,9 @@ final class AttrDefaultFormatter extends FormatterBase {
               $item->value = 'https://doi.org/' . $item->value;
             }
             $url = parse_url($item->value);
-            $item->value = '<a href="' . $item->value . '">'.trim($url['path'], '/').'</a>';
+            $item->value = '<a href="' . $item->value . '">' . trim($url['path'], '/') . '</a>';
             break;
+
           case 'arxiv':
             if (!filter_var($item->value, FILTER_VALIDATE_URL)) {
               $item->value = 'https://arxiv.org/abs/' . $item->value;
@@ -88,14 +91,15 @@ final class AttrDefaultFormatter extends FormatterBase {
             $url = parse_url($item->value);
             $components = explode('/abs/', $url['path']);
             $arxivId = array_pop($components);
-            $item->value = '<a href="' . $item->value . '">'.$arxivId.'</a>';
+            $item->value = '<a href="' . $item->value . '">' . $arxivId . '</a>';
             break;
+
           case 'orcid':
             if (!filter_var($item->value, FILTER_VALIDATE_URL)) {
               $item->value = 'http://orcid.org/' . $item->value;
             }
             $url = parse_url($item->value);
-            $item->value = '<a href="' . $item->value . '">'.trim($url['path'], '/').'</a>';
+            $item->value = '<a href="' . $item->value . '">' . trim($url['path'], '/') . '</a>';
             break;
         }
 

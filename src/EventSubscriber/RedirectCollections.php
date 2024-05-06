@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\lehigh_islandora\EventSubscriber;
 
-use Drupal\node\Entity\Node;
 use Drupal\Core\Url;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpKernel\KernelEvents;
+use Drupal\node\Entity\Node;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * Redirect collections to their View.
@@ -43,7 +43,7 @@ final class RedirectCollections implements EventSubscriberInterface {
       $path = ltrim($path, '/');
       $path_parts = explode('/', $path);
       if (isset($path_parts[1]) && is_numeric($path_parts[1])) {
-        $nid = (int)$path_parts[1];
+        $nid = (int) $path_parts[1];
       }
       else {
         return;
@@ -58,13 +58,14 @@ final class RedirectCollections implements EventSubscriberInterface {
       }
     }
   }
+
   /**
    * {@inheritdoc}
    */
   public static function getSubscribedEvents(): array {
     return [
       KernelEvents::REQUEST => [
-        ['redirectCollections'],
+      ['redirectCollections'],
       ],
     ];
   }

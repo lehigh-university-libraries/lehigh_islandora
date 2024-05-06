@@ -30,9 +30,11 @@ class Uriports extends ReportingHandlerBase {
     $form['subdomain'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Subdomain'),
-      '#description' => $this->t('Your <a href=":url">uriports.com subdomain</a>.', [
-        ':url' => 'https://www.uriports.com/',
-      ]),
+      '#description' => $this->t(
+          'Your <a href=":url">uriports.com subdomain</a>.', [
+            ':url' => 'https://www.uriports.com/',
+          ]
+      ),
       '#default_value' => $this->configuration['subdomain'] ?? '',
       '#states' => [
         'required' => [
@@ -65,9 +67,9 @@ class Uriports extends ReportingHandlerBase {
     $type = $this->configuration['type'] == 'report-only' ? 'report' : 'enforce';
 
     $policy->setDirective(
-      'report-uri',
-      'https://' . $this->configuration['subdomain'] . '.uriports.com/reports/' . $type
-    );
+          'report-uri',
+          'https://' . $this->configuration['subdomain'] . '.uriports.com/reports/' . $type
+      );
   }
 
 }

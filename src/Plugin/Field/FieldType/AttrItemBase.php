@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Drupal\lehigh_islandora\Plugin\Field\FieldType;
 
@@ -37,7 +39,7 @@ abstract class AttrItemBase extends FieldItemBase {
   public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
     $element = parent::fieldSettingsForm($form, $form_state);
 
-    for ($key = 0; $key < 2; $key++) {      
+    for ($key = 0; $key < 2; $key++) {
       $element['attr' . $key . '_name'] = [
         '#type' => 'textfield',
         '#title' => 'Attribute ' . ($key + 1) . ' label',
@@ -49,7 +51,7 @@ abstract class AttrItemBase extends FieldItemBase {
         '#title' => 'Attribute ' . ($key + 1) . ' allowed attribute',
         '#multiple' => TRUE,
         '#default_value' => $this->getSetting('attr' . $key . '_values'),
-        // TODO: make this list editable in the UI
+        // @todo make this list editable in the UI
         '#options' => self::possibleValues(),
         '#required' => $key == 0,
         '#states' => [
@@ -203,7 +205,8 @@ abstract class AttrItemBase extends FieldItemBase {
       'basic_html' => t('Basic HTML'),
       'mathjax' => t('MathJAX'),
       'full_html' => t('Full HTML'),
-      'restricted_html' => t('Restricted HTML')
+      'restricted_html' => t('Restricted HTML'),
     ];
   }
+
 }

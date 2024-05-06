@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\lehigh_islandora\EventSubscriber;
 
-use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * Add uriports headers not handled by csp module.
@@ -14,16 +14,16 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 final class Uriports implements EventSubscriberInterface {
 
   /**
-   * Add additional headers needed for uriports.com
+   * Add additional headers needed for uriports.com.
    *
    * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
    *   The event to process.
    */
   public function addHeaders(ResponseEvent $event) : void {
     if (!$event->isMainRequest()) {
-        return;
+      return;
     }
-  
+
     $response = $event->getResponse();
     $response->headers->set('Report-To', '{"group":"default","max_age":10886400,"endpoints":[{"url":"https://ccssq3ur.uriports.com/reports"}],"include_subdomains":true}');
     $response->headers->set('Reporting-Endpoints', 'default="https://ccssq3ur.uriports.com/reports"');
@@ -36,8 +36,9 @@ final class Uriports implements EventSubscriberInterface {
   public static function getSubscribedEvents(): array {
     return [
       KernelEvents::RESPONSE => [
-        ['addHeaders'],
+      ['addHeaders'],
       ],
     ];
   }
+
 }

@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Drupal\lehigh_islandora\Plugin\Field\FieldType;
 
@@ -123,4 +125,5 @@ final class PartDetailItem extends FieldItemBase {
       'volume' => t('Volume'),
     ];
   }
+
 }

@@ -38,10 +38,11 @@ class IgnorePages extends ProcessorPluginBase {
   public function alterIndexedItems(array &$items) {
     foreach ($items as $item_id => $item) {
       $node = $item->getOriginalObject()->getValue();
-      if ($node->hasField('field_model') &&
-        !is_null($node->field_model->entity) &&
-        !empty($node->field_model->entity->field_external_uri->uri) &&
-        $node->field_model->entity->field_external_uri->uri === 'http://id.loc.gov/ontologies/bibframe/part') {
+      if ($node->hasField('field_model')
+            && !is_null($node->field_model->entity)
+            && !empty($node->field_model->entity->field_external_uri->uri)
+            && $node->field_model->entity->field_external_uri->uri === 'http://id.loc.gov/ontologies/bibframe/part'
+        ) {
         unset($items[$item_id]);
       }
     }

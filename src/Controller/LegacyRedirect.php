@@ -41,9 +41,9 @@ class LegacyRedirect extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity_type.manager'),
-      $container->get('database')
-    );
+          $container->get('entity_type.manager'),
+          $container->get('database')
+      );
   }
 
   /**
@@ -51,10 +51,12 @@ class LegacyRedirect extends ControllerBase {
    */
   public function perform(Request $request, string $pid) {
     $entity_type = 'node';
-    $nid = $this->database->query('SELECT entity_id FROM {node__field_pid}
+    $nid = $this->database->query(
+          'SELECT entity_id FROM {node__field_pid}
       WHERE field_pid_value = :pid', [
         ':pid' => $pid,
-      ])->fetchField();
+      ]
+      )->fetchField();
     if ($nid && $node = $this->entityTypeManager->getStorage($entity_type)->load($nid)) {
       $url = $node->toUrl('canonical');
       $route_name = $url->getRouteName();

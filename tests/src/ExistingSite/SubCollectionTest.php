@@ -8,6 +8,10 @@ use weitzman\DrupalTestTraits\ExistingSiteBase;
  * Tests around Islandora sub collections.
  */
 class SubCollectionTest extends ExistingSiteBase {
+
+  /**
+   *
+   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -23,12 +27,14 @@ class SubCollectionTest extends ExistingSiteBase {
    * @throws \Behat\Mink\Exception\ExpectationException
    */
   public function testSubCollection() {
-    $node = $this->createNode([
-      'title' => 'Very Important Sub Collection',
-      'type' => 'islandora_object',
-      'uid' => 1,
-      'field_model' => lehigh_islandora_get_tid_by_name('Sub-Collection', 'islandora_models')
-    ]);
+    $node = $this->createNode(
+          [
+            'title' => 'Very Important Sub Collection',
+            'type' => 'islandora_object',
+            'uid' => 1,
+            'field_model' => lehigh_islandora_get_tid_by_name('Sub-Collection', 'islandora_models'),
+          ]
+      );
     $node->setPublished()->save();
     $this->assertEquals(1, $node->getOwnerId());
 

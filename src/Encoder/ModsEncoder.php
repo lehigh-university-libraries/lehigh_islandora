@@ -71,11 +71,11 @@ class ModsEncoder extends XmlEncoder {
       $name = [
         'namePart' => $agent->entity->label(),
         'role' => [
-          [
-            'roleTerm' => [
-              $roleTerm
-            ],
+        [
+          'roleTerm' => [
+            $roleTerm,
           ],
+        ],
         ],
       ];
       if ($agent->entity->bundle() == "corporate_body") {
@@ -132,7 +132,7 @@ class ModsEncoder extends XmlEncoder {
           "#" => is_null($field->entity) ? $field->value : $field->entity->label(),
         ];
         if (!empty($field->attr0)) {
-          // TODO: lookup field and get value for attr0 instead of assumming it's type
+          // @todo lookup field and get value for attr0 instead of assumming it's type
           if ($fieldName == 'field_extent') {
             $value["@unit"] = $field->attr0;
           }
@@ -141,7 +141,7 @@ class ModsEncoder extends XmlEncoder {
           }
         }
         if (!empty($field->attr1)) {
-          // TODO: lookup field and get value for attr1 instead of assumming it's type
+          // @todo lookup field and get value for attr1 instead of assumming it's type
           $value["@unit"] = $field->attr1;
         }
         $tempModsField[] = $value;
@@ -242,7 +242,7 @@ class ModsEncoder extends XmlEncoder {
         'number',
         'title',
       ];
-      foreach($entity->field_part_detail as $field) {
+      foreach ($entity->field_part_detail as $field) {
         $partDetail = [];
         foreach ($keys as $key) {
           if ($field->$key != "") {
@@ -256,8 +256,8 @@ class ModsEncoder extends XmlEncoder {
       }
     }
     if (!$entity->field_edtf_date_issued->isEmpty()) {
-      $date_str = !$entity->field_edtf_date_created->isEmpty() && strlen($entity->field_edtf_date_created->value) >  strlen($entity->field_edtf_date_issued->value) ?
-        $entity->field_edtf_date_created->value : $entity->field_edtf_date_issued->value;
+      $date_str = !$entity->field_edtf_date_created->isEmpty() && strlen($entity->field_edtf_date_created->value) > strlen($entity->field_edtf_date_issued->value) ?
+            $entity->field_edtf_date_created->value : $entity->field_edtf_date_issued->value;
       $date = \DateTime::createFromFormat('Y-m-d', $date_str);
       $mods['originInfo']['dateIssued'] = [
         "#" => $date ? $date->format('n/j/Y') : $date_str,
@@ -275,4 +275,3 @@ class ModsEncoder extends XmlEncoder {
   }
 
 }
-

@@ -51,7 +51,6 @@ function lehigh_islandora_xmlsitemap_link_alter(array &$link, array $context) {
   }
 }
 
-
 /**
  * Implements hook_pathauto_pattern_alter().
  */
@@ -101,6 +100,9 @@ function lehigh_islandora_theme_registry_alter(array &$theme_registry) {
   $theme_registry['node_edit_form']['path'] = $module_path . '/templates';
 }
 
+/**
+ *
+ */
 function lehigh_islandora_node_is_embargoed($node) {
   $storage = \Drupal::entityTypeManager()->getStorage('embargo');
   $embargoes = $storage->getApplicableEmbargoes($node);
@@ -225,18 +227,21 @@ function lehigh_islandora_node_delete(EntityInterface $entity) {
   lehigh_islandora_clear_disk_cache($entity);
 }
 
+/**
+ *
+ */
 function lehigh_islandora_clear_disk_cache(EntityInterface $node) {
   $filesystem = \Drupal::service('file_system');
 
-  // remove cached serialized JSON for workbench exports from disk
+  // Remove cached serialized JSON for workbench exports from disk.
   $json_cache = 'private://serialized/node/' . $node->id() . '.json';
   $f = $filesystem->realpath($json_cache);
   if (file_exists($f)) {
     unlink($f);
   }
 
-  // remove cached IIIF manifests from disk
-  // for this node and its parent
+  // Remove cached IIIF manifests from disk
+  // for this node and its parent.
   $base_dir = $filesystem->realpath('private://iiif');
   $nids = [$node->id()];
   if ($node->hasField('field_member_of')) {
@@ -269,9 +274,9 @@ function lehigh_islandora_get_tid_by_name($name, $vid, $auto_create = FALSE) {
 
   $tid = \Drupal::database()->query('SELECT tid FROM {taxonomy_term_field_data}
     WHERE name = :name AND vid = :vid', [
-    ':vid' => $vid,
-    ':name' => $name,
-  ])->fetchField();
+      ':vid' => $vid,
+      ':name' => $name,
+    ])->fetchField();
   if (!$tid && $auto_create) {
     $term = Term::create([
       'vid' => $vid,
@@ -303,34 +308,32 @@ function lehigh_islandora_get_ocfl_dir(string $objectId) : string {
   return $path;
 }
 
-
 /**
  * Implements hook_views_query_alter().
  */
 function lehigh_islandora_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
   if ($view->id() == 'browse') {
     if (isset($view->args[0])) {
-      $arg = (int)$view->args[0];
+      $arg = (int) $view->args[0];
     }
     else {
       $current_path = \Drupal::service('path.current')->getPath();
       $current_path = ltrim($current_path, '/');
       $path_parts = explode('/', $current_path);
       if (isset($path_parts[1]) && is_numeric($path_parts[1])) {
-        $arg = (int)$path_parts[1];
+        $arg = (int) $path_parts[1];
       }
       else {
         $arg = -1;
       }
     }
 
-    // get the term IDs we filter on
+    // Get the term IDs we filter on.
     $models = [
       'collection' => lehigh_islandora_get_tid_by_name('Collection', 'islandora_models'),
       'sub-collection' => lehigh_islandora_get_tid_by_name('Sub-Collection', 'islandora_models'),
       'page' => lehigh_islandora_get_tid_by_name('Page', 'islandora_models'),
     ];
-
 
     // /browse-items/-1 -> all non-collection items
     // browse all items
@@ -342,23 +345,23 @@ function lehigh_islandora_views_query_alter(ViewExecutable $view, QueryPluginBas
     elseif ($arg == 0) {
       $query->addCondition('field_model', [
         $models['collection'],
-        $models['sub-collection']
+        $models['sub-collection'],
       ], 'IN');
 
       $query->addCondition('field_member_of', [1, 2, 185], 'IN');
       $query->sort('title');
     }
-    // browse a specific collection
-    // /browse-items/([1-9]([0-9]+)?) -> all items in collection
+    // Browse a specific collection
+    // /browse-items/([1-9]([0-9]+)?) -> all items in collection.
     else {
       $query->addCondition('field_model', [$models['page']], 'NOT IN');
 
-      // search all sub collections
-      // otherwise only show direct descendants
+      // Search all sub collections
+      // otherwise only show direct descendants.
       $field = empty($_GET['search_api_fulltext']) ? 'field_member_of' : 'field_descendant_of';
       $query->addCondition($field, [$arg], 'IN');
 
-      // see if there's a custom sort on this collection
+      // See if there's a custom sort on this collection.
       $sort = \Drupal::database()->query('SELECT field_sort_by_value FROM {node__field_sort_by} WHERE entity_id = :id', [':id' => $arg])->fetchField();
       if ($sort) {
         $components = explode('_', $sort);
