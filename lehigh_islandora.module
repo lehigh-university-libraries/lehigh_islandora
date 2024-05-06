@@ -256,6 +256,29 @@ function lehigh_islandora_clear_disk_cache(EntityInterface $node) {
     $pattern = $base_dir . '/*/node/' . $nid . '/*.*';
     array_map('unlink', glob($pattern));
   }
+
+  // Remove cached node canonical pages from disk
+  // for this node and its parent.
+  $base_dir = $filesystem->realpath('private://canonical');
+  $nids = [$node->id()];
+  if ($node->hasField('field_member_of')) {
+    foreach ($node->field_member_of as $parent) {
+      if (is_null($parent->entity)) {
+        continue;
+      }
+      $nids[] = $parent->entity->id();
+    }
+  }
+  foreach ($nids as $nid) {
+    $pattern = $base_dir . '/*/node/' . $nid . '/*.html';
+    array_map('unlink', glob($pattern));
+
+    foreach (['node', 'browse-items'] as $alias) {
+      $palias = \Drupal::service('path_alias.manager')->getAliasByPath('/' . $alias . '/' . $nid);
+      $pattern = $base_dir . '/*/' . $palias . '/*.html';
+      array_map('unlink', glob($pattern));
+    }
+  }
 }
 
 /**
