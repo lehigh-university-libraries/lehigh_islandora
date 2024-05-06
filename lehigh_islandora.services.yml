@@ -12,6 +12,11 @@ services:
     arguments: ['@config.factory']
     tags:
       - { name: event_subscriber }
+  lehigh_islandora.cache_node_canonical:
+    class: Drupal\lehigh_islandora\EventSubscriber\CacheNodeCanonical
+    arguments: ['@config.factory']
+    tags:
+      - { name: event_subscriber }
   lehigh_islandora.redirect_collections:
     class: Drupal\lehigh_islandora\EventSubscriber\RedirectCollections
     arguments: ['@config.factory']

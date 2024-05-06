@@ -13,17 +13,17 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * Cache book manifests on disk.
+ * Cache node canonical on disk.
  */
-final class CacheBookManifests implements EventSubscriberInterface {
+final class CacheNodeCanonical implements EventSubscriberInterface {
 
   /**
-   * Listen for book manifest requests.
+   * Listen for node canonical requests.
    *
    * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
    *   The event to process.
    */
-  public function getCachedManifest(RequestEvent $event) : void {
+  public function getCachedNodeView(RequestEvent $event) : void {
     // See if we're dealing with a book manifest request.
     $request = $event->getRequest();
     if (!$this->applies($request, TRUE)) {
@@ -33,40 +33,45 @@ final class CacheBookManifests implements EventSubscriberInterface {
     // Now we know we're dealing with a IIIF manifest route, so
     // see if we have a cached response on disk.
     $path = $request->getPathInfo();
-    $file_path = self::getCachedFilePath($path);
+    $file_path = self::getCachedFilePath($request, $path);
+
     if (file_exists($file_path)) {
       $file_contents = file_get_contents($file_path);
       $response = new Response($file_contents, Response::HTTP_OK);
       $response->headers->set('Cache-Control', 'max-age=3600, public');
-      $response->headers->set('Content-Type', 'application/json');
+      $response->headers->set('Content-Type', 'text/html');
       $response->headers->set('X-Drupal-Cache', 'HIT');
       $age = (string) (time() - filemtime($file_path));
       $response->headers->set('X-Age', $age);
-
       $event->setResponse($response);
     }
   }
 
   /**
-   * Listen for book manifest responses.
+   * Listen for node canonical responses.
    *
    * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
    *   The event to process.
    */
-  public function setCachedManifest(ResponseEvent $event) : void {
+  public function setCachedNodeView(ResponseEvent $event) : void {
     // See if the response is for a book manifest.
     $request = $event->getRequest();
     if (!$this->applies($request)) {
       return;
     }
 
+    $response = $event->getResponse();
+    if ($response->getStatusCode() !== 200) {
+      return;
+    }
+
     $path = $request->getPathInfo();
-    $file_path = self::getCachedFilePath($path);
+    $file_path = self::getCachedFilePath($request, $path);
 
     // If we're invalidating the cache
     // OR the cached file doesn't exist create it from the response.
     if ($request->query->get('cache-warmer', FALSE) || !file_exists($file_path)) {
-      $body = $event->getResponse()->getContent();
+      $body = $response->getContent();
       $dir = dirname($file_path);
       $filesystem = \Drupal::service('file_system');
       if ($filesystem->prepareDirectory($dir, FileSystemInterface::CREATE_DIRECTORY)) {
@@ -85,10 +90,10 @@ final class CacheBookManifests implements EventSubscriberInterface {
   public static function getSubscribedEvents(): array {
     return [
       KernelEvents::REQUEST => [
-      ['getCachedManifest'],
+      ['getCachedNodeView'],
       ],
       KernelEvents::RESPONSE => [
-      ['setCachedManifest'],
+      ['setCachedNodeView'],
       ],
     ];
   }
@@ -103,7 +108,7 @@ final class CacheBookManifests implements EventSubscriberInterface {
     }
 
     $route_name = $request->attributes->get('_route');
-    if ($route_name === "view.iiif_manifest.rest_export_1") {
+    if (in_array($route_name, ["view.browse.main", "entity.node.canonical"])) {
       return TRUE;
     }
 
@@ -111,21 +116,31 @@ final class CacheBookManifests implements EventSubscriberInterface {
   }
 
   /**
-   * Helper function to get the path to cache the book manifests to.
+   * Helper function to get the path to cache the node canonical HTML to.
    */
-  protected static function getCachedFilePath(string $path): string {
+  protected static function getCachedFilePath(Request $request, string $path): string {
     $filesystem = \Drupal::service('file_system');
-    $base_dir = 'private://iiif';
+    $base_dir = 'private://canonical';
 
-    // Make a subdirectory based on the current user's role IDs.
-    $role_ids = \Drupal::currentUser()->getRoles();
-    $role_ids = implode('', $role_ids);
-    $base_dir .= '/' . md5($role_ids);
+    // Make a subdirectory based on the current user ID.
+    $base_dir .= '/' . \Drupal::currentUser()->id();
 
+    // Another dir based on the current path.
+    $base_dir .= '/' . $path;
     $filesystem->prepareDirectory($base_dir, FileSystemInterface::CREATE_DIRECTORY);
-
     $base_dir = $filesystem->realpath($base_dir);
-    $file_path = $base_dir . $path . '.json';
+
+    $file_path = $base_dir . '/';
+
+    // Make the filename based on any URL parameters.
+    $queryParams = $request->query->all();
+    if (count($queryParams)) {
+      $queryParams = json_encode($queryParams);
+      $file_path .= md5($queryParams) . '.html';
+    }
+    else {
+      $file_path .= 'canonical.html';
+    }
 
     return $file_path;
   }

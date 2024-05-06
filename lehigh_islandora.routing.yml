@@ -9,3 +9,11 @@ lehigh_islandora.legacy_redirect:
     parameters:
       pid:
         type: string
+
+lehigh_islandora.paged_content:
+  path: '/api/v1/paged-content'
+  defaults:
+    _controller: '\Drupal\lehigh_islandora\Controller\PagedContent::get'
+    _title: 'Get Parent Items'
+  requirements:
+    _permission: 'access content'
