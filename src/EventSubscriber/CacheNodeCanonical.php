@@ -25,13 +25,13 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
    *   The event to process.
    */
   public function getCachedNodeView(RequestEvent $event) : void {
-    // See if we're dealing with a book manifest request.
+    // See if we're dealing with a /node/\d+ request.
     $request = $event->getRequest();
     if (!$this->applies($request, TRUE)) {
       return;
     }
 
-    // Now we know we're dealing with a IIIF manifest route, so
+    // Now we know we're dealing with a node canonical route, so
     // see if we have a cached response on disk.
     $path = $request->getPathInfo();
     $file_path = self::getCachedFilePath($request, $path);
@@ -55,12 +55,12 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
    *   The event to process.
    */
   public function setCachedNodeView(ResponseEvent $event) : void {
-    // See if the response is for a book manifest.
     $request = $event->getRequest();
     if (!$this->applies($request)) {
       return;
     }
 
+    // don't save non-200 responses
     $response = $event->getResponse();
     if ($response->getStatusCode() !== 200) {
       return;
@@ -68,6 +68,7 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
 
     $path = $request->getPathInfo();
     $file_path = self::getCachedFilePath($request, $path);
+    // TODO: gate this on an internal IP too
     $invalidating = $request->query->get('cache-warmer', FALSE);
     // If we're invalidating the cache
     // OR the cached file doesn't exist create it from the response.
