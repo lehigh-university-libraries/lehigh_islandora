@@ -366,6 +366,33 @@ function lehigh_islandora_warm_cache($nid) {
       ['@msg' => $e->getMessage()]
     );
   }
+
+  // also cache the IIIF manifest
+  if (!$node->field_model->isEmpty()
+    && !is_null($node->field_model->entity)) {
+    $model = $node->field_model->entity->label();
+    $iiif_url = "[node:url:unaliased:absolute]/manifest";
+    if (in_array($model, ['Publication Issue', 'Paged Content'])) {
+      $iiif_url = "[node:url:unaliased:absolute]/book-manifest";
+    }
+    $eventMessage->target = \Drupal::service('token')->replace($iiif_url, ['node' => $node]);
+    $json = json_encode($eventMessage);
+    $message = new Message(
+      $json,
+      $event->getHeaders()->all()
+    );
+    try {
+      $stomp->begin();
+      $stomp->send("islandora-cache-warmer", $message);
+      $stomp->commit();
+    }
+    catch (StompException $e) {
+      $logger->error(
+        'Error publishing message: @msg',
+        ['@msg' => $e->getMessage()]
+      );
+    }
+  }
 }
 
 /**
