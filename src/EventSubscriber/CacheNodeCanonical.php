@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\lehigh_islandora\EventSubscriber;
 
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\node\Entity\Node;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -67,14 +68,38 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
 
     $path = $request->getPathInfo();
     $file_path = self::getCachedFilePath($request, $path);
-
+    $invalidating = $request->query->get('cache-warmer', FALSE);
     // If we're invalidating the cache
     // OR the cached file doesn't exist create it from the response.
-    if ($request->query->get('cache-warmer', FALSE) || !file_exists($file_path)) {
+    if ($invalidating || !file_exists($file_path)) {
       $body = $response->getContent();
       $dir = dirname($file_path);
       $filesystem = \Drupal::service('file_system');
       if ($filesystem->prepareDirectory($dir, FileSystemInterface::CREATE_DIRECTORY)) {
+        // If the cache is being invalidating on this node
+        // remove all its cached responses.
+        if ($invalidating) {
+          $node = FALSE;
+          if ($request->attributes->has('node')) {
+            $nid = $request->attributes->get('node');
+            $node = is_object($nid) ? $nid : Node::load($nid);
+          }
+
+          // If we're invalidating a node, clear its disk cache.
+          if ($node) {
+            self::clearDiskCache($node);
+          }
+          // If this is not a node response that's cached
+          // base it on the path.
+          else {
+            $base_dir = $filesystem->realpath('private://canonical');
+            if ($base_dir) {
+              $pattern = "$base_dir/*/$path/*.html";
+              array_map('unlink', glob($pattern));
+            }
+          }
+        }
+
         $f = fopen($file_path, 'w');
         if ($f) {
           fwrite($f, $body);
@@ -90,10 +115,10 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
   public static function getSubscribedEvents(): array {
     return [
       KernelEvents::REQUEST => [
-      ['getCachedNodeView'],
+        ['getCachedNodeView'],
       ],
       KernelEvents::RESPONSE => [
-      ['setCachedNodeView'],
+        ['setCachedNodeView'],
       ],
     ];
   }
@@ -102,11 +127,12 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
    *
    */
   protected function applies(Request $request, $get = FALSE): bool {
-    // Bail if we want to force a regeneration.
+    // Bail if we want to force a regeneration and we're fetching cache.
     if ($get && $request->query->get('cache-warmer', FALSE)) {
       return FALSE;
     }
 
+    // Only apply on the node canonical view or our collections/browse views.
     $route_name = $request->attributes->get('_route');
     if (in_array($route_name, ["view.browse.main", "entity.node.canonical"])) {
       return TRUE;
@@ -134,15 +160,58 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
 
     // Make the filename based on any URL parameters.
     $queryParams = $request->query->all();
+    // But don't include our special cache param to reset index.
+    unset($queryParams['cache-warmer']);
     if (count($queryParams)) {
       $queryParams = json_encode($queryParams);
       $file_path .= md5($queryParams) . '.html';
     }
     else {
-      $file_path .= 'canonical.html';
+      $file_path .= 'index.html';
     }
 
     return $file_path;
+  }
+
+  /**
+   *
+   */
+  public static function clearDiskCache($node) {
+    // Remove cached node canonical pages from disk
+    // for this node and its parent.
+    $filesystem = \Drupal::service('file_system');
+    $base_dir = $filesystem->realpath('private://canonical');
+    $base_dir .= '/*';
+
+    // Wipe the cache for the node and its parent(s)
+    $nids = [$node->id()];
+    if ($node->hasField('field_member_of')) {
+      foreach ($node->field_member_of as $parent) {
+        if (is_null($parent->entity)) {
+          continue;
+        }
+        $nids[] = $parent->entity->id();
+      }
+    }
+
+    // Perform the cache clear.
+    foreach ($nids as $nid) {
+      $pattern = $base_dir . '/node/' . $nid . '/*.html';
+      array_map('unlink', glob($pattern));
+
+      // Wipe any aliases for these nodes.
+      foreach (['node', 'browse-items'] as $arg0) {
+        $alias = \Drupal::service('path_alias.manager')->getAliasByPath("/$arg0/$nid");
+        $pattern = $base_dir . '/' . $alias . '/*.html';
+        array_map('unlink', glob($pattern));
+      }
+    }
+
+    // Also clear our views.
+    foreach (['browse', 'collections'] as $dir) {
+      $pattern = "$base_dir/$dir/*.html";
+      array_map('unlink', glob($pattern));
+    }
   }
 
 }
