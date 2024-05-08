@@ -125,7 +125,7 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
   }
 
   /**
-   *
+   * Helper function to see if the given response needs handled by this cache service.
    */
   protected function applies(Request $request, $get = FALSE): bool {
     // Bail if we want to force a regeneration and we're fetching cache.
@@ -157,60 +157,38 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
     $filesystem->prepareDirectory($base_dir, FileSystemInterface::CREATE_DIRECTORY);
     $base_dir = $filesystem->realpath($base_dir);
 
-    $file_path = $base_dir . '/';
-
     // Make the filename based on any URL parameters.
     $queryParams = $request->query->all();
-    // But don't include our special cache param to reset index.
+    // But don't include our special cache param in the calculation.
     unset($queryParams['cache-warmer']);
     if (count($queryParams)) {
       $queryParams = json_encode($queryParams);
-      $file_path .= md5($queryParams) . '.html';
+      $file_path = $base_dir . '/' . md5($queryParams) . '.html';
     }
     else {
-      $file_path .= 'index.html';
+      $file_path = $base_dir . '/index.html';
     }
 
     return $file_path;
   }
 
   /**
-   *
+   * Remove cached node canonical pages from disk.
    */
   public static function clearDiskCache($node) {
-    // Remove cached node canonical pages from disk
-    // for this node and its parent.
     $filesystem = \Drupal::service('file_system');
     $base_dir = $filesystem->realpath('private://canonical');
-    $base_dir .= '/*';
 
-    // Wipe the cache for the node and its parent(s)
-    $nids = [$node->id()];
-    if ($node->hasField('field_member_of')) {
-      foreach ($node->field_member_of as $parent) {
-        if (is_null($parent->entity)) {
-          continue;
-        }
-        $nids[] = $parent->entity->id();
-      }
-    }
+    $nid = $node->id();
+    // $base_dir/* will wipe all the caches for all users, since we're storing responses by uid
+    // *.html will get the canonical view along with any ?foo=bar query parameters
+    $pattern = "$base_dir/*/node/$nid/*.html";
+    array_map('unlink', glob($pattern));
 
-    // Perform the cache clear.
-    foreach ($nids as $nid) {
-      $pattern = $base_dir . '/node/' . $nid . '/*.html';
-      array_map('unlink', glob($pattern));
-
-      // Wipe any aliases for these nodes.
-      foreach (['node', 'browse-items'] as $arg0) {
-        $alias = \Drupal::service('path_alias.manager')->getAliasByPath("/$arg0/$nid");
-        $pattern = $base_dir . '/' . $alias . '/*.html';
-        array_map('unlink', glob($pattern));
-      }
-    }
-
-    // Also clear our views.
-    foreach (['browse', 'collections'] as $dir) {
-      $pattern = "$base_dir/$dir/*.html";
+    // Wipe any aliases for this node.
+    foreach (['node', 'browse-items'] as $arg0) {
+      $alias = \Drupal::service('path_alias.manager')->getAliasByPath("/$arg0/$nid");
+      $pattern = "$base_dir/*/$alias/*.html";
       array_map('unlink', glob($pattern));
     }
   }
