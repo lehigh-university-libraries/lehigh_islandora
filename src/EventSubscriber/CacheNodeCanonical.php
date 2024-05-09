@@ -39,11 +39,10 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
     if (file_exists($file_path)) {
       $file_contents = file_get_contents($file_path);
       $response = new Response($file_contents, Response::HTTP_OK);
-      $response->headers->set('Cache-Control', 'max-age=3600, public');
       $response->headers->set('Content-Type', 'text/html');
       $response->headers->set('X-Drupal-Cache', 'HIT');
       $age = (string) (time() - filemtime($file_path));
-      $response->headers->set('X-Age', $age);
+      $response->headers->set('Age', $age);
       $event->setResponse($response);
     }
   }
