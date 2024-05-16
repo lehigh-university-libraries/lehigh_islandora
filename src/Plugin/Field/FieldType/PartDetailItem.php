@@ -27,7 +27,7 @@ final class PartDetailItem extends FieldItemBase {
    * {@inheritdoc}
    */
   public function isEmpty(): bool {
-    return $this->type === NULL && $this->caption === NULL && $this->number === NULL && $this->title === NULL;
+    return empty($this->caption) && empty($this->number) && empty($this->title);
   }
 
   /**

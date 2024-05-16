@@ -27,7 +27,7 @@ final class RelatedItemItem extends FieldItemBase {
    * {@inheritdoc}
    */
   public function isEmpty(): bool {
-    return $this->identifier === NULL && $this->identifier_type === NULL && $this->number === NULL && $this->title === NULL;
+    return empty($this->identifier) && empty($this->number) && empty($this->title);
   }
 
   /**

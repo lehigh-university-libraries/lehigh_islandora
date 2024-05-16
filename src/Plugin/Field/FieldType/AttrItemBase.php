@@ -18,7 +18,8 @@ abstract class AttrItemBase extends FieldItemBase {
    * {@inheritdoc}
    */
   public function isEmpty(): bool {
-    return $this->value === NULL;
+    $value = $this->get('value')->getValue();
+    return empty($value);
   }
 
   /**
