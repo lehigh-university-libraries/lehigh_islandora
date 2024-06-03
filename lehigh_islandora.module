@@ -368,7 +368,7 @@ function lehigh_islandora_warm_cache($nid) {
   }
 
   // also cache the IIIF manifest
-  if (!$node->field_model->isEmpty()
+  if ($node->hasField('field_model') && !$node->field_model->isEmpty()
     && !is_null($node->field_model->entity)) {
     $model = $node->field_model->entity->label();
     $iiif_url = "[node:url:unaliased:absolute]/manifest";
