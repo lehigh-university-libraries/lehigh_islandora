@@ -114,8 +114,9 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
    */
   public static function getSubscribedEvents(): array {
     return [
+      // Make this a lower priority so other event subscribers can fire first.
       KernelEvents::REQUEST => [
-        ['getCachedNodeView'],
+        ['getCachedNodeView', -100],
       ],
       KernelEvents::RESPONSE => [
         ['setCachedNodeView'],
