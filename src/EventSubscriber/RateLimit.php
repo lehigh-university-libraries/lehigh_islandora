@@ -72,13 +72,12 @@ class RateLimit implements EventSubscriberInterface {
       $threshold,
       $window,
     );
+    $this->flood->register($event_name, $window);
     if (!$allowed) {
       $response = new Response('Too many requests', 429);
       $event->setResponse($response);
       return FALSE;
     }
-
-    $this->flood->register($event_name, $window);
   }
 
 }
