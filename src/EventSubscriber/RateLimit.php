@@ -48,8 +48,13 @@ class RateLimit implements EventSubscriberInterface {
     }
 
     $route_name = $request->attributes->get('_route');
-
-    return in_array($route_name, ["view.browse.main", "view.advanced_search.page_1", "entity.node.canonical"]);
+    return in_array($route_name, [
+      "view.browse.main",
+      "view.advanced_search.page_1",
+      "entity.node.canonical",
+      "flysystem.files",
+      "flysystem.serve",
+    ]);
   }
 
   /**
