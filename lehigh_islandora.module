@@ -265,8 +265,8 @@ function lehigh_islandora_node_presave(EntityInterface $entity) {
   // and check if the parent needs a thumbnail
   elseif ($entity->hasField('field_member_of')) {
     foreach ($entity->field_member_of as $parent) {
-      if (lehigh_islandora_compound_needs_thumbnail($parent)) {
-        lehigh_islandora_set_compound_thumbnail($parent);
+      if (!is_null($parent->entity) && lehigh_islandora_compound_needs_thumbnail($parent->entity)) {
+        lehigh_islandora_set_compound_thumbnail($parent->entity);
         break;
       }
     }
