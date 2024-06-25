@@ -14,6 +14,7 @@ use Drupal\taxonomy\Entity\Term;
 use Drupal\user\Entity\User;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
 use Drupal\views\ViewExecutable;
+use Drupal\views\Views;
 use Stomp\Exception\StompException;
 use Stomp\Transport\Message;
 
@@ -248,6 +249,72 @@ function lehigh_islandora_media_delete(EntityInterface $media) {
     !$media->field_media_of->isEmpty() &&
     !is_null($media->field_media_of->entity)) {
     lehigh_islandora_clear_disk_cache($media->field_media_of->entity);
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function lehigh_islandora_node_presave(EntityInterface $entity) {
+  // if we're saving a compound object
+  // see if it needs a thumbnail set
+  if (lehigh_islandora_compound_needs_thumbnail($entity)) {
+    lehigh_islandora_set_compound_thumbnail($entity);
+  }
+  // or check if this node's parent is a compound object
+  // and check if the parent needs a thumbnail
+  elseif ($entity->hasField('field_member_of')) {
+    foreach ($entity->field_member_of as $parent) {
+      if (lehigh_islandora_compound_needs_thumbnail($parent)) {
+        lehigh_islandora_set_compound_thumbnail($parent);
+        break;
+      }
+    }
+  }
+}
+
+function lehigh_islandora_compound_needs_thumbnail($entity) : bool {
+  return $entity->hasField('field_model')
+    && $entity->hasField('field_thumbnail')
+    && !$entity->field_model->isEmpty()
+    && !is_null($entity->field_model->entity)
+    && $entity->field_thumbnail->isEmpty()
+    && $entity->field_model->entity->label() == 'Compound Object';
+}
+
+function lehigh_islandora_set_compound_thumbnail($node) {
+  $view = Views::getView('compound_object_subcollections');
+  if (!is_object($view)) {
+    \Drupal::logger('lehigh_islandora')->error("Missing compound_object_subcollections view");
+    return;
+  }
+
+  $view->setDisplay('block_1');
+  $view->setArguments([$node->id()]);
+  $view->execute();
+  // bail if there are no children
+  if (empty($view->result[0]->_item)) {
+    return;
+  }
+
+  $child = $view->result[0]->_item->getOriginalObject()->getValue();
+  // see if the child has a thumbnail set in the respective field
+  // and use it for this compount object parent's thumbnail
+  if ($child->hasField('field_thumbnail') && !$child->field_thumbnail->isEmpty()) {
+    $node->set('field_thumbnail', $child->field_thumbnail->target_id);
+  }
+  // otherwise, see if there's a thumbnail attached
+  // and use it for this compount object parent's thumbnail
+  else {
+    $mid = \Drupal::database()->query("SELECT o.entity_id FROM media__field_media_of o
+      INNER JOIN media__field_media_use u ON u.entity_id = o.entity_id
+      WHERE field_media_use_target_id = :tid AND field_media_of_target_id = :nid", [
+        ":tid" => lehigh_islandora_get_tid_by_name("Thumbnail Image", "islandora_models"),
+        ':nid' => $child->id(),
+      ])->fetchField();
+    if ($mid) {
+      $node->set('field_thumbnail', $mid);
+    }
   }
 }
 
