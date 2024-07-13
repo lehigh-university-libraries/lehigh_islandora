@@ -96,6 +96,11 @@ function lehigh_islandora_tokens($type, $tokens, array $data, array $options, Bu
               && !$node->field_edtf_date_issued->isEmpty()
           ) {
           $date = $node->field_edtf_date_issued->value;
+          $components = explode('-', $date);
+          if (count($components) != 3) {
+            $replacements[$original] = $components[0];
+            continue;
+          }
           $date = EDTFUtils::iso8601Value($date);
           $date = strtotime($date);
           $replacements[$original] = date('Y/n/j', $date);
