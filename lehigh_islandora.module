@@ -115,6 +115,9 @@ function lehigh_islandora_node_is_embargoed($node) {
   if (count($embargoes)) {
     foreach ($embargoes as $embargo) {
       $d = $embargo->getExpirationDate();
+      if (is_null($d)) {
+        return new Drupal\Core\Datetime\DrupalDateTime("2999-12-31", 'UTC');
+      }
       if ($d->getTimestamp() > time()) {
         return $d;
       }
