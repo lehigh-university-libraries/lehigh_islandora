@@ -99,7 +99,7 @@ function lehigh_islandora_tokens($type, $tokens, array $data, array $options, Bu
           $components = explode('-', $date);
           if (count($components) != 3) {
             $replacements[$original] = $components[0];
-            continue;
+            break;
           }
           $date = EDTFUtils::iso8601Value($date);
           $date = strtotime($date);
