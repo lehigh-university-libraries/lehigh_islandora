@@ -7,3 +7,4 @@ dependencies:
   - islandora:islandora
   - token:token
   - redirect:redirect
+  - lehigh_site_support:lehigh_site_support

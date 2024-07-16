@@ -3,6 +3,8 @@
 namespace Drupal\lehigh_islandora\Encoder;
 
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Url;
+use Drupal\node\Entity\Node;
 use Symfony\Component\Serializer\Encoder\CsvEncoder;
 
 /**
@@ -78,28 +80,24 @@ class WorkbenchCsvEncoder extends CsvEncoder {
       'revision_translation_affected',
       'content_translation_source',
       'content_translation_outdated',
+      'citation',
       // @todo make this configurable
       'field_thumbnail',
     ];
     foreach ($remove as $field) {
       unset($data[$field]);
     }
-    $row = [];
 
-    // If the header from the first entity was passed
-    // make 100% sure the array we iterator over is in the same order
-    // as the first entity.
-    if (count($header)) {
-      $newData = [];
-      foreach ($header as $column) {
-        if ($column == "node_id") {
-          $column = "nid";
-        }
-        $newData[$column] = $data[$column];
-      }
-      $data = $newData;
-    }
-
+    $row = [
+      'node_id' => '',
+      'title' => '',
+      'field_model' => '',
+      'url' => '',
+      'thumbnail' => '',
+      'file' => '',
+    ];
+    $file_url_generator = \Drupal::service('file_url_generator');
+    $alias_manager = \Drupal::service('path_alias.manager');
     foreach ($data as $fieldName => $fieldValues) {
       $cell = [];
       foreach ($fieldValues as $k => $fieldValue) {
@@ -146,6 +144,27 @@ class WorkbenchCsvEncoder extends CsvEncoder {
       }
       if ($fieldName == 'nid') {
         $fieldName = 'node_id';
+        $nid = implode("|", $cell);
+        $node = Node::load($nid);
+        if ($node) {
+          $path = '/node/';
+          if (lehigh_site_support_identify_collection($node)) {
+            $path = '/browse-items/';
+          }
+          $alias = $alias_manager->getAliasByPath($path . $node->id());
+
+          $url = Url::fromUserInput($alias, ['absolute' => TRUE]);
+          $row['url'] = $url->toString();
+
+          $original_file = lehigh_site_support_get_node_file($node, 'http://pcdm.org/use#OriginalFile');
+          if ($original_file) {
+            $row['file'] = $file_url_generator->generateAbsoluteString($original_file->getFileUri());
+          }
+          $thumbnail = lehigh_site_support_get_node_file($node, 'http://pcdm.org/use#ThumbnailImage');
+          if ($thumbnail) {
+            $row['thumbnail'] = $file_url_generator->generateAbsoluteString($thumbnail->getFileUri());
+          }
+        }
       }
       $row[$fieldName] = implode("|", $cell);
     }
