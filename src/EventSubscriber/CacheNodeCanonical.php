@@ -35,10 +35,10 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
     // see if we have a cached response on disk.
     $path = $request->getPathInfo();
     $file_path = self::getCachedFilePath($request, $path);
-
     if (file_exists($file_path)) {
       $file_contents = file_get_contents($file_path);
       $response = new Response($file_contents, Response::HTTP_OK);
+      $response->headers->set('Link', '<https://preserve.lehigh.edu/' . $path . '>; rel="canonical"');
       $response->headers->set('Content-Type', 'text/html');
       $response->headers->set('X-Drupal-Cache', 'HIT');
       $age = (string) (time() - filemtime($file_path));
@@ -67,6 +67,8 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
 
     $path = $request->getPathInfo();
     $file_path = self::getCachedFilePath($request, $path);
+    $response->headers->set('Link', '<https://preserve.lehigh.edu/' . $path . '>; rel="canonical"');
+
     // TODO: gate this on an internal IP too
     $invalidating = $request->query->get('cache-warmer', FALSE);
     // If we're invalidating the cache

@@ -27,6 +27,11 @@ services:
     arguments: ['@config.factory']
     tags:
       - { name: event_subscriber }
+  lehigh_islandora.pdf_canonical:
+    class: Drupal\lehigh_islandora\EventSubscriber\PdfCanonicalLink
+    arguments: ['@config.factory']
+    tags:
+      - { name: event_subscriber }
   lehigh_islandora.redirect_terms:
     class: Drupal\lehigh_islandora\EventSubscriber\RabbitHoleTerms
     arguments: ['@config.factory']
