@@ -71,7 +71,7 @@ final class PdfCanonicalLink implements EventSubscriberInterface {
   protected function applies(Request $request, $get = FALSE): bool {
     // Only apply on the node canonical view or our collections/browse views.
     $route_name = $request->attributes->get('_route');
-    if (in_array($route_name, ["flysystem.files"])) {
+    if (in_array($route_name, ["flysystem.serve", "flysystem.files"])) {
       return TRUE;
     }
 
