@@ -261,34 +261,34 @@ function lehigh_islandora_media_delete(EntityInterface $media) {
 function lehigh_islandora_node_presave(EntityInterface $entity) {
   // if we're saving a compound object
   // see if it needs a thumbnail set
-  if (lehigh_islandora_compound_needs_thumbnail($entity)) {
-    lehigh_islandora_set_compound_thumbnail($entity);
+  if (lehigh_islandora_parent_needs_thumbnail($entity)) {
+    lehigh_islandora_set_parent_thumbnail($entity);
   }
   // or check if this node's parent is a compound object
   // and check if the parent needs a thumbnail
   elseif ($entity->hasField('field_member_of')) {
     foreach ($entity->field_member_of as $parent) {
-      if (!is_null($parent->entity) && lehigh_islandora_compound_needs_thumbnail($parent->entity)) {
-        lehigh_islandora_set_compound_thumbnail($parent->entity);
+      if (!is_null($parent->entity) && lehigh_islandora_parent_needs_thumbnail($parent->entity)) {
+        lehigh_islandora_set_parent_thumbnail($parent->entity);
         break;
       }
     }
   }
 }
 
-function lehigh_islandora_compound_needs_thumbnail($entity) : bool {
+function lehigh_islandora_parent_needs_thumbnail($entity) : bool {
   return $entity->hasField('field_model')
     && $entity->hasField('field_thumbnail')
     && !$entity->field_model->isEmpty()
     && !is_null($entity->field_model->entity)
     && $entity->field_thumbnail->isEmpty()
-    && $entity->field_model->entity->label() == 'Compound Object';
+    && in_array($entity->field_model->entity->label(), ['Paged Content', 'Compound Object']);
 }
 
-function lehigh_islandora_set_compound_thumbnail($node) {
-  $view = Views::getView('compound_object_subcollections');
+function lehigh_islandora_set_parent_thumbnail($node) {
+  $view = Views::getView('children');
   if (!is_object($view)) {
-    \Drupal::logger('lehigh_islandora')->error("Missing compound_object_subcollections view");
+    \Drupal::logger('lehigh_islandora')->error("Missing children view");
     return;
   }
 
@@ -296,11 +296,11 @@ function lehigh_islandora_set_compound_thumbnail($node) {
   $view->setArguments([$node->id()]);
   $view->execute();
   // bail if there are no children
-  if (empty($view->result[0]->_item)) {
+  if (empty($view->result[0]->_entity)) {
     return;
   }
 
-  $child = $view->result[0]->_item->getOriginalObject()->getValue();
+  $child = $view->result[0]->_entity;
   // see if the child has a thumbnail set in the respective field
   // and use it for this compount object parent's thumbnail
   if ($child->hasField('field_thumbnail') && !$child->field_thumbnail->isEmpty()) {
