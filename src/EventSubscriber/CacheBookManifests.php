@@ -63,6 +63,12 @@ final class CacheBookManifests implements EventSubscriberInterface {
     $path = $request->getPathInfo();
     $file_path = self::getCachedFilePath($path);
 
+    // don't save non-200 responses
+    $response = $event->getResponse();
+    if ($response->getStatusCode() !== 200) {
+      return;
+    }
+
     // If we're invalidating the cache
     // OR the cached file doesn't exist create it from the response.
     if ($request->query->get('cache-warmer', FALSE) || !file_exists($file_path)) {
