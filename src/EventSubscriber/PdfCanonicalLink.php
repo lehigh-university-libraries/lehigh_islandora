@@ -37,6 +37,7 @@ final class PdfCanonicalLink implements EventSubscriberInterface {
     }
 
     $uri = str_replace('/_flysystem/fedora/', 'fedora://', $request->getPathInfo());
+    $uri = str_replace('/system/files/', 'private://', $uri);
     if (substr($uri, -4) !== '.pdf') {
       return;
     }
