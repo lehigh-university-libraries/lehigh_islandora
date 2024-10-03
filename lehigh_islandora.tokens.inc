@@ -36,15 +36,16 @@ function lehigh_islandora_token_info_alter(&$data) {
     'name' => 'Technical Report Number',
     'description' => 'Show Lehigh for Technical Reports',
   ];
-
+  $data['tokens']['node']['lehigh_pdf_url'] = [
+    'name' => 'PDF URL',
+    'description' => 'PDF',
+  ];
 }
 
 /**
  * Implements hook_tokens().
  */
 function lehigh_islandora_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
-
-  $token_service = \Drupal::token();
 
   if (isset($options['langcode'])) {
     $url_options['language'] = \Drupal::languageManager()
@@ -139,7 +140,20 @@ function lehigh_islandora_tokens($type, $tokens, array $data, array $options, Bu
           $replacements[$original] = implode(',', $authors);
         }
         break;
-
+      case 'lehigh_pdf_url':
+        $uri = \Drupal::database()->query('SELECT uri FROM media__field_media_document d
+          INNER JOIN media__field_media_use u ON u.entity_id = d.entity_id
+          INNER JOIN media__field_media_of mo ON mo.entity_id = d.entity_id
+          INNER JOIN file_managed f ON f.fid = field_media_document_target_id
+          WHERE field_media_of_target_id = :nid
+            AND field_media_use_target_id IN (16, 18)
+          ORDER BY field_media_use_target_id DESC
+          LIMIT 1', [':nid' => $node->id()])->fetchField();
+        if (!$uri) {
+          break;
+        }
+        $replacements[$original] = \Drupal::service('file_url_generator')->generateAbsoluteString($uri);
+        break;
       case 'parent-url':
         if ($node->hasField('field_member_of')
               && !$node->field_member_of->isEmpty()
