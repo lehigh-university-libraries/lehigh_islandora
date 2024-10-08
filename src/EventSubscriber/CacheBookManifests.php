@@ -33,7 +33,7 @@ final class CacheBookManifests implements EventSubscriberInterface {
     // Now we know we're dealing with a IIIF manifest route, so
     // see if we have a cached response on disk.
     $path = $request->getPathInfo();
-    $file_path = self::getCachedFilePath($path);
+    $file_path = self::getCachedFilePath($request, $path);
     if (file_exists($file_path)) {
       $file_contents = file_get_contents($file_path);
       $response = new Response($file_contents, Response::HTTP_OK);
@@ -61,7 +61,7 @@ final class CacheBookManifests implements EventSubscriberInterface {
     }
 
     $path = $request->getPathInfo();
-    $file_path = self::getCachedFilePath($path);
+    $file_path = self::getCachedFilePath($request, $path);
 
     // don't save non-200 responses
     $response = $event->getResponse();
@@ -119,9 +119,11 @@ final class CacheBookManifests implements EventSubscriberInterface {
   /**
    * Helper function to get the path to cache the book manifests to.
    */
-  protected static function getCachedFilePath(string $path): string {
+  protected static function getCachedFilePath(Request $request, string $path): string {
     $filesystem = \Drupal::service('file_system');
     $base_dir = 'private://iiif';
+    $base_dir .= '/' . $request->getHost();
+
 
     // Make a subdirectory based on the current user's role IDs.
     $role_ids = \Drupal::currentUser()->getRoles();

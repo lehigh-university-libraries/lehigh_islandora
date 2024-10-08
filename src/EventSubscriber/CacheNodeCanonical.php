@@ -150,6 +150,7 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
   protected static function getCachedFilePath(Request $request, string $path): string {
     $filesystem = \Drupal::service('file_system');
     $base_dir = 'private://canonical';
+    $base_dir .= '/' . $request->getHost();
 
     // Make a subdirectory based on the current user ID.
     $base_dir .= '/' . \Drupal::currentUser()->id();
