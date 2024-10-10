@@ -546,6 +546,9 @@ function lehigh_islandora_views_query_alter(ViewExecutable $view, QueryPluginBas
     // browse all items
     if ($arg == -1) {
       $query->addCondition('field_model', array_values($models), 'NOT IN');
+      if (empty($_GET['sort_bef_combine'])) {
+        $query->sort('search_api_relevance', 'DESC');
+      }
     }
     // /browse-items/0
     // browse all collections
@@ -570,7 +573,7 @@ function lehigh_islandora_views_query_alter(ViewExecutable $view, QueryPluginBas
 
       // See if there's a custom sort on this collection.
       $sort = \Drupal::database()->query('SELECT field_sort_by_value FROM {node__field_sort_by} WHERE entity_id = :id', [':id' => $arg])->fetchField();
-      if ($sort) {
+      if ($sort && empty($_GET['sort_bef_combine'])) {
         $components = explode('_', $sort);
         $direction = array_pop($components);
         $sort_by = implode('_', $components);
