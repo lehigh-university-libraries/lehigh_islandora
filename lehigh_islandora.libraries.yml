@@ -17,3 +17,15 @@ part_detail:
   css:
     component:
       css/part-detail-widget.css: {}
+
+node-form:
+  css:
+    component:
+      css/node-form.css: {}
+  js:
+    js/node-form.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery.once

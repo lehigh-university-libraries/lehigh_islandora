@@ -17,6 +17,7 @@ use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
 use Stomp\Exception\StompException;
 use Stomp\Transport\Message;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Implements hook_help().
@@ -581,4 +582,28 @@ function lehigh_islandora_views_query_alter(ViewExecutable $view, QueryPluginBas
       }
     }
   }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function lehigh_islandora_form_node_islandora_object_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  $request = \Drupal::request();
+  $display_name = $request->query->get('display');
+  if ($display_name !== 'user_submission') {
+    return;
+  }
+
+  $form['field_abstract']['widget'][0]['attr0']['#default_value'] = 'abstract';
+
+  $form['field_edtf_date_created'][0]['#attributes']['placeholder'] = 'YYYY-MM-DD';
+
+  $form['field_rights']['widget'][0]['#type'] = 'select';
+  $form['field_rights']['widget'][0]['#options'] = [
+    'http://rightsstatements.org/vocab/InC/1.0/' => 'IN COPYRIGHT',
+    'http://rightsstatements.org/vocab/InC-EDU/1.0/' => 'IN COPYRIGHT - EDUCATIONAL USE PERMITTED',
+    'http://rightsstatements.org/vocab/InC-NC/1.0/' => 'IN COPYRIGHT - NON-COMMERCIAL USE PERMITTED',
+    'http://rightsstatements.org/vocab/CNE/1.0/' => 'I don’t know, get in touch with more information'
+  ];
+  $form['#attached']['library'][] = 'lehigh_islandora/node-form';
 }

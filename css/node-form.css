@@ -1,0 +1,9 @@
+.tabledrag-toggle-weight-wrapper,
+.field-actions,
+.field-multiple-table tbody tr td:not(:nth-child(2)),
+#edit-title-wrapper,
+.form-item--field-abstract-0-attr0,
+.js-filter-wrapper,
+label[for="edit-field-abstract-0-value-value"] {
+  display: none !important;
+}
