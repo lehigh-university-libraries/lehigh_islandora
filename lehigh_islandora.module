@@ -275,6 +275,26 @@ function lehigh_islandora_node_presave(EntityInterface $entity) {
       }
     }
   }
+  if (lehigh_site_support_identify_collection($entity) &&
+    !is_null($entity->original) &&
+    !lehigh_site_support_identify_collection($entity->original)) {
+    $alias_storage = \Drupal::service('entity_type.manager')->getStorage('path_alias');
+    $path = '/node/' . $entity->id();
+    $aliases = $alias_storage->loadByProperties(['path' => $path]);
+    foreach ($aliases as $alias) {
+      $alias->delete();
+    }
+  }
+  if (!lehigh_site_support_identify_collection($entity) &&
+    !is_null($entity->original) &&
+    lehigh_site_support_identify_collection($entity->original)) {
+    $alias_storage = \Drupal::service('entity_type.manager')->getStorage('path_alias');
+    $path = '/browse-items/' . $entity->id();
+    $aliases = $alias_storage->loadByProperties(['path' => $path]);
+    foreach ($aliases as $alias) {
+      $alias->delete();
+    }
+  }
 }
 
 function lehigh_islandora_parent_needs_thumbnail($entity) : bool {
