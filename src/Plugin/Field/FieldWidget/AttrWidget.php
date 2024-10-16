@@ -83,16 +83,16 @@ final class AttrWidget extends WidgetBase {
         $values[$delta]['value'] = $value['value']['value'];
       }
 
-      if ($value['attr0'] === '') {
+      if (empty($value['attr0'])) {
         $values[$delta]['attr0'] = NULL;
       }
-      if ($value['attr1'] === '') {
+      if (empty($value['attr1'])) {
         $values[$delta]['attr1'] = NULL;
       }
-      if ($value['value'] === '') {
+      if (empty($value['value'])) {
         $values[$delta]['value'] = NULL;
       }
-      if ($value['format'] === '') {
+      if (empty($value['format'])) {
         $values[$delta]['format'] = NULL;
       }
     }
