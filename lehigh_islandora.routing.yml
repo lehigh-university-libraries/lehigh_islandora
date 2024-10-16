@@ -17,3 +17,15 @@ lehigh_islandora.paged_content:
     _title: 'Get Parent Items'
   requirements:
     _permission: 'access content'
+
+lehigh_islandora.legacy_solr_redirect:
+  path: '/islandora/rest/v1/solr/{pid}'
+  defaults:
+    _controller: '\Drupal\lehigh_islandora\Controller\LegacyRedirect::perform'
+    _title: 'Legacy Redirect'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      pid:
+        type: string

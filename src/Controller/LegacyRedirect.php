@@ -72,9 +72,8 @@ class LegacyRedirect extends ControllerBase {
 
       return $this->redirect($route_name, $route_parameters, $options, 301);
     }
-    else {
-      throw new NotFoundHttpException();
-    }
+
+    return $this->redirect("<front>", [], [], 301);
   }
 
 }
