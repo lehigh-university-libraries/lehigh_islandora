@@ -51,7 +51,7 @@ final class RedirectCollections implements EventSubscriberInterface {
 
       // If this is a collection, redirect it to the view.
       $node = Node::load($nid);
-      if (lehigh_site_support_identify_collection($node)) {
+      if (lehigh_site_support_identify_collection($node, TRUE)) {
         $url = Url::fromRoute('view.browse.main', ['node' => $node->id()]);
         $redirect = new RedirectResponse($url->toString());
         $event->setResponse($redirect);
