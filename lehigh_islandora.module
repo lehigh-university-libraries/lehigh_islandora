@@ -84,7 +84,7 @@ function lehigh_islandora_pathauto_alias_alter(&$alias, array &$context) {
   if (!empty($context['data']['node'])) {
     $node = $context['data']['node'];
 
-    if (lehigh_site_support_identify_collection($node)) {
+    if (lehigh_site_support_identify_collection($node, TRUE)) {
       $context['source'] = '/browse-items/' . $node->id();
     }
   }
@@ -275,9 +275,9 @@ function lehigh_islandora_node_presave(EntityInterface $entity) {
       }
     }
   }
-  if (lehigh_site_support_identify_collection($entity) &&
+  if (lehigh_site_support_identify_collection($entity, TRUE) &&
     !is_null($entity->original) &&
-    !lehigh_site_support_identify_collection($entity->original)) {
+    !lehigh_site_support_identify_collection($entity->original, TRUE)) {
     $alias_storage = \Drupal::service('entity_type.manager')->getStorage('path_alias');
     $path = '/node/' . $entity->id();
     $aliases = $alias_storage->loadByProperties(['path' => $path]);
@@ -285,9 +285,9 @@ function lehigh_islandora_node_presave(EntityInterface $entity) {
       $alias->delete();
     }
   }
-  if (!lehigh_site_support_identify_collection($entity) &&
+  if (!lehigh_site_support_identify_collection($entity, true) &&
     !is_null($entity->original) &&
-    lehigh_site_support_identify_collection($entity->original)) {
+    lehigh_site_support_identify_collection($entity->original, TRUE)) {
     $alias_storage = \Drupal::service('entity_type.manager')->getStorage('path_alias');
     $path = '/browse-items/' . $entity->id();
     $aliases = $alias_storage->loadByProperties(['path' => $path]);
