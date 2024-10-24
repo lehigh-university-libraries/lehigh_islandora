@@ -368,6 +368,8 @@ function lehigh_islandora_node_delete(EntityInterface $entity) {
  */
 function lehigh_islandora_clear_disk_cache(EntityInterface $node) {
   $filesystem = \Drupal::service('file_system');
+  $request = \Drupal::request();
+  $current_domain = $request->getHost();
 
   // Remove cached serialized JSON for workbench exports from disk.
   $json_cache = 'private://serialized/node/' . $node->id() . '.json';
@@ -378,7 +380,7 @@ function lehigh_islandora_clear_disk_cache(EntityInterface $node) {
 
   // Remove cached IIIF manifests from disk
   // for this node and its parent.
-  $base_dir = $filesystem->realpath('private://iiif');
+  $base_dir = $filesystem->realpath("private://iiif/$current_domain");
   $nids = [$node->id()];
   if ($node->hasField('field_member_of')) {
     foreach ($node->field_member_of as $parent) {
