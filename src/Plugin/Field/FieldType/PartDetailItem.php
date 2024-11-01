@@ -120,6 +120,7 @@ final class PartDetailItem extends FieldItemBase {
       'article' => t('Article'),
       'heading' => t('Heading'),
       'illustration' => t('Illustration'),
+      'page' => t('Page Numbers'),
       'issue' => t('Issue'),
       'section' => t('Section'),
       'volume' => t('Volume'),

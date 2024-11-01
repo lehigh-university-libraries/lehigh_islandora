@@ -18,6 +18,8 @@ use Drupal\views\Views;
 use Stomp\Exception\StompException;
 use Stomp\Transport\Message;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Component\Serialization\Json;
+use GuzzleHttp\Exception\RequestException;
 
 /**
  * Implements hook_help().
@@ -347,6 +349,26 @@ function lehigh_islandora_set_parent_thumbnail($node) {
  */
 function lehigh_islandora_node_insert(EntityInterface $entity) {
   lehigh_islandora_clear_disk_cache($entity);
+  if ($entity->hasField('field_input_source') &&
+    $entity->field_input_source->value == 'input_form') {
+    $webhook_url = getenv('SLACK_WEBHOOK');
+    if (!$webhook_url) {
+      return;
+    }
+
+    $payload = [
+      'msg' => 'New submission: ' . $entity->toUrl('canonical', ['absolute' => TRUE])->toString()
+    ];
+    try {
+      \Drupal::httpClient()->post($webhook_url, [
+        'headers' => ['Content-Type' => 'application/json'],
+        'body' => Json::encode($payload),
+      ]);
+    }
+    catch (RequestException $e) {
+      \Drupal::logger('lehigh_islandora')->error('Failed to send message to Slack: @message', ['@message' => $e->getMessage()]);
+    } 
+  }
 }
 
 /**
@@ -617,15 +639,5 @@ function lehigh_islandora_form_node_islandora_object_form_alter(array &$form, Fo
   }
 
   $form['field_abstract']['widget'][0]['attr0']['#default_value'] = 'abstract';
-
-  $form['field_edtf_date_created'][0]['#attributes']['placeholder'] = 'YYYY-MM-DD';
-
-  $form['field_rights']['widget'][0]['#type'] = 'select';
-  $form['field_rights']['widget'][0]['#options'] = [
-    'http://rightsstatements.org/vocab/InC/1.0/' => 'IN COPYRIGHT',
-    'http://rightsstatements.org/vocab/InC-EDU/1.0/' => 'IN COPYRIGHT - EDUCATIONAL USE PERMITTED',
-    'http://rightsstatements.org/vocab/InC-NC/1.0/' => 'IN COPYRIGHT - NON-COMMERCIAL USE PERMITTED',
-    'http://rightsstatements.org/vocab/CNE/1.0/' => 'I don’t know, get in touch with more information'
-  ];
   $form['#attached']['library'][] = 'lehigh_islandora/node-form';
 }
