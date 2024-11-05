@@ -29,3 +29,8 @@ node-form:
     - core/drupal
     - core/drupalSettings
     - core/jquery.once
+
+altmetrics:
+  version: 1.0
+  js:
+    https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js: { external: true }
