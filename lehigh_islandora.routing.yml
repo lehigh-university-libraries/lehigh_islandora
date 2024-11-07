@@ -29,3 +29,11 @@ lehigh_islandora.legacy_solr_redirect:
     parameters:
       pid:
         type: string
+
+lehigh_islandora.access_request_form:
+  path: '/ajax/access-request-form'
+  defaults:
+    _controller: '\Drupal\lehigh_islandora\Controller\AccessRequest::accessRequestForm'
+    _title: 'Access Request Form'
+  requirements:
+    _permission: 'access content'

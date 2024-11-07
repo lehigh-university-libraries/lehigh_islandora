@@ -34,3 +34,14 @@ altmetrics:
   version: 1.0
   js:
     https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js: { external: true }
+
+node:
+  css:
+    component:
+      css/node.css: {}
+  js:
+    js/node.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/jquery.once

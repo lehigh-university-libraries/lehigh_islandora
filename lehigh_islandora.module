@@ -641,3 +641,15 @@ function lehigh_islandora_form_node_islandora_object_form_alter(array &$form, Fo
   $form['field_abstract']['widget'][0]['attr0']['#default_value'] = 'abstract';
   $form['#attached']['library'][] = 'lehigh_islandora/node-form';
 }
+
+
+function lehigh_islandora_preprocess_node(&$vars) {
+  $node = $vars['node'];
+  if ($vars['view_mode'] !== 'full' || $node->bundle() !== 'islandora_object') {
+    return;
+  }
+  if (lehigh_site_support_identify_collection($node, TRUE)) {
+    return;
+  }
+  $vars['#attached']['library'][] = 'lehigh_islandora/node';
+}
