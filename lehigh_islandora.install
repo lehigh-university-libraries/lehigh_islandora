@@ -88,3 +88,21 @@ function lehigh_islandora_update_100102() {
   }
 
 }
+
+
+/**
+ * Move discoverygarden embargo into node field.
+ */
+function lehigh_islandora_update_100103() {
+  $nids = \Drupal::database()->query("SELECT embargoed_node, COALESCE(expiration_date, '2999-12-31') FROM {embargo}")->fetchAllKeyed();
+  foreach ($nids as $nid => $date) {
+    $node = Node::load($nid);
+    $node->set('field_edtf_date_embargo', $date);
+    $node->save();
+  }
+  \Drupal::database()->query("TRUNCATE TABLE {embargo}");
+  \Drupal::service('module_installer')->uninstall([
+    'embargo',
+    'islandora_hierarchical_access',
+  ]);
+}

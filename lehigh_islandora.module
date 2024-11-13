@@ -5,6 +5,7 @@
  * Contains lehigh_islandora.module.
  */
 
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\islandora\Event\StompHeaderEvent;
@@ -110,20 +111,19 @@ function lehigh_islandora_theme_registry_alter(array &$theme_registry) {
 }
 
 /**
- *
+ * Check if a node is embargoed.
  */
 function lehigh_islandora_node_is_embargoed($node) {
-  $storage = \Drupal::entityTypeManager()->getStorage('embargo');
-  $embargoes = $storage->getApplicableEmbargoes($node);
-  if (count($embargoes)) {
-    foreach ($embargoes as $embargo) {
-      $d = $embargo->getExpirationDate();
-      if (is_null($d)) {
-        return new Drupal\Core\Datetime\DrupalDateTime("2999-12-31", 'UTC');
-      }
-      if ($d->getTimestamp() > time()) {
-        return $d;
-      }
+  if (!is_object($node) ||
+    !$node->hasField('field_edtf_date_embargo') ||
+    $node->field_edtf_date_embargo->isEmpty()) {
+    return FALSE;
+  }
+
+  foreach ($node->field_edtf_date_embargo as $embargo) {
+    $d = new DrupalDateTime($embargo->value, 'UTC');
+    if ($d->getTimestamp() > time()) {
+      return $d;
     }
   }
 
@@ -652,4 +652,32 @@ function lehigh_islandora_preprocess_node(&$vars) {
     return;
   }
   $vars['#attached']['library'][] = 'lehigh_islandora/node';
+}
+
+/**
+ * Implements hook_file_download().
+ */
+function lehigh_islandora_file_download($uri) {
+  $embargoed = \Drupal::database()->query("SELECT fid FROM {file_managed} f
+    LEFT JOIN {media__field_media_audio_file} a ON field_media_audio_file_target_id = f.fid
+    LEFT JOIN {media__field_media_document} d ON field_media_document_target_id = f.fid
+    LEFT JOIN {media__field_media_file} mf ON field_media_file_target_id = f.fid
+    LEFT JOIN {media__field_media_image} i ON field_media_image_target_id = f.fid
+    LEFT JOIN {media__field_media_video_file} v ON field_media_video_file_target_id = f.fid
+    INNER JOIN {media__field_media_of} m ON
+      m.entity_id = a.entity_id OR
+      m.entity_id = d.entity_id OR
+      m.entity_id = mf.entity_id OR
+      m.entity_id = i.entity_id OR
+      m.entity_id = v.entity_id
+    INNER JOIN {node__field_edtf_date_embargo} e ON e.entity_id = field_media_of_target_id
+    WHERE uri = :uri
+      AND field_edtf_date_embargo_value > NOW()", [
+      ':uri' => $uri
+    ])->fetchField();
+  if ($embargoed) {
+    return -1;
+  }
+
+  return NULL;
 }
