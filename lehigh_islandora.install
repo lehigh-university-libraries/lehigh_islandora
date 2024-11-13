@@ -97,6 +97,7 @@ function lehigh_islandora_update_100103() {
   $nids = \Drupal::database()->query("SELECT embargoed_node, COALESCE(expiration_date, '2999-12-31') FROM {embargo}")->fetchAllKeyed();
   foreach ($nids as $nid => $date) {
     $node = Node::load($nid);
+    if (!$node) continue;
     $node->set('field_edtf_date_embargo', $date);
     $node->save();
   }
