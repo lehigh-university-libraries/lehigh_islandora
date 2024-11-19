@@ -21,6 +21,7 @@ use Stomp\Transport\Message;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Component\Serialization\Json;
 use GuzzleHttp\Exception\RequestException;
+use Drupal\lehigh_islandora\Event\MediaInsertEvent;
 
 /**
  * Implements hook_help().
@@ -204,6 +205,10 @@ function lehigh_islandora_hide_hocr($node) {
  * Implements hook_ENTITY_TYPE_insert().
  */
 function lehigh_islandora_media_insert(EntityInterface $media) {
+  $dispatcher = \Drupal::service('event_dispatcher');
+  $event = new MediaInsertEvent($media);
+  $dispatcher->dispatch($event, MediaInsertEvent::NAME);
+
   if ($media->bundle() == 'image' &&
     !$media->field_media_use->isEmpty() &&
     !$media->field_media_of->isEmpty() &&
@@ -297,6 +302,32 @@ function lehigh_islandora_node_presave(EntityInterface $entity) {
       $alias->delete();
     }
   }
+}
+
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function lehigh_islandora_media_presave(EntityInterface $media) {
+  // for microsoft 365 documents
+  // set the original file to preservation master
+  // so we can create original file being pdf
+  // then service file being
+  if ($media->bundle() == 'file' &&
+    !$media->field_media_use->isEmpty() &&
+    !$media->field_media_of->isEmpty() &&
+    !is_null($media->field_media_use->entity) &&
+    !is_null($media->field_media_of->entity) &&
+    !$media->field_media_file->isEmpty() &&
+    !is_null($media->field_media_file->entity) &&
+    $media->field_media_use->entity->label() == 'Original File') {
+    $components = explode('.', $media->field_media_file->entity->getFileUri());
+    $extension = array_pop($components);
+    if (in_array($extension, ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'])) {
+      $media->set('field_media_use', lehigh_islandora_get_tid_by_name('Preservation Master File', 'islandora_media_use'));
+    }
+  }
+
 }
 
 function lehigh_islandora_parent_needs_thumbnail($entity) : bool {

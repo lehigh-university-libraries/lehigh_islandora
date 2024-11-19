@@ -41,3 +41,7 @@ services:
     class: Drupal\lehigh_islandora\EventSubscriber\FacetQueryStringSubscriber
     tags:
       - { name: event_subscriber }
+  lehigh_islandora.media_insert_subscriber:
+    class: Drupal\lehigh_islandora\EventSubscriber\MediaInsertSubscriber
+    tags:
+      - { name: event_subscriber }
