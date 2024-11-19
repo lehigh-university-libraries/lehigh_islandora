@@ -313,21 +313,23 @@ function lehigh_islandora_media_presave(EntityInterface $media) {
   // set the original file to preservation master
   // so we can create original file being pdf
   // then service file being
-  if ($media->bundle() == 'file' &&
+  if (($media->bundle() == 'file' || $media->bundle() == 'document') &&
     !$media->field_media_use->isEmpty() &&
     !$media->field_media_of->isEmpty() &&
     !is_null($media->field_media_use->entity) &&
-    !is_null($media->field_media_of->entity) &&
-    !$media->field_media_file->isEmpty() &&
-    !is_null($media->field_media_file->entity) &&
-    $media->field_media_use->entity->label() == 'Original File') {
-    $components = explode('.', $media->field_media_file->entity->getFileUri());
-    $extension = array_pop($components);
-    if (in_array($extension, ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'])) {
-      $media->set('field_media_use', lehigh_islandora_get_tid_by_name('Preservation Master File', 'islandora_media_use'));
+    !is_null($media->field_media_of->entity)) {
+
+    $file_field = $media->bundle() === 'document' ? 'field_media_document' : 'field_media_file';
+    if (!$media->get($file_field)->isEmpty() &&
+      !is_null($media->get($file_field)->entity) &&
+      $media->field_media_use->entity->label() == 'Original File') {
+      $components = explode('.', $media->get($file_field)->entity->getFileUri());
+      $extension = array_pop($components);
+      if (in_array($extension, ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'])) {
+        $media->set('field_media_use', lehigh_islandora_get_tid_by_name('Preservation Master File', 'islandora_media_use'));
+      }
     }
   }
-
 }
 
 function lehigh_islandora_parent_needs_thumbnail($entity) : bool {

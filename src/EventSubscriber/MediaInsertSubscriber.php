@@ -43,7 +43,7 @@ class MediaInsertSubscriber implements EventSubscriberInterface {
     foreach ($media->field_media_of as $field_media_of) {
       $node = $field_media_of->entity;
       // check if microsoft file needs PDF
-      if ($media->bundle() === 'file') {
+      if ($media->bundle() === 'file' || $media->bundle() === 'document') {
         switch($media->field_media_use->entity->field_external_uri->uri) {
           case 'http://pcdm.org/use#PreservationMasterFile':
             $action_name = 'microsoft_document_to_pdf';
@@ -52,7 +52,7 @@ class MediaInsertSubscriber implements EventSubscriberInterface {
       }
       // check if original file needs coverpage
       elseif ($node->hasField('field_add_coverpage') &&
-        $node->field_add_coverpage->isEmpty() &&
+        !$node->field_add_coverpage->isEmpty() &&
         $node->field_add_coverpage->value) {
 
         if ($media->bundle() == 'document') {
