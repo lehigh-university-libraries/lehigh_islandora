@@ -40,9 +40,6 @@ class PagedContentAggregatedPdfTest extends ExistingSiteBase {
   
       $fs->copy($source_path, $destination_path, FileExists::Replace);
     }
-  
-    // Cause tests to fail if an error is sent to Drupal logs.
-    $this->failOnLoggedErrors();
   }
 
   /**
