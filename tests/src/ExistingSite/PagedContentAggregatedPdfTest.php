@@ -117,7 +117,6 @@ class PagedContentAggregatedPdfTest extends ExistingSiteBase {
       FROM media__field_media_of m
       INNER JOIN media__field_media_use mu ON mu.entity_id = m.entity_id
       WHERE field_media_of_target_id IN (:nids[])', [
-          ':tid' => lehigh_islandora_get_tid_by_name('Original File', 'islandora_media_use'),
           ':nids[]' => $nids,
       ])->fetchField();
 
