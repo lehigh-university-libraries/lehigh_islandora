@@ -40,6 +40,8 @@ class PagedContentAggregatedPdfTest extends ExistingSiteBase {
   
       $fs->copy($source_path, $destination_path, FileExists::Replace);
     }
+  
+    $this->ignoreLoggedErrors();
   }
 
   /**
