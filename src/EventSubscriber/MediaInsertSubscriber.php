@@ -78,7 +78,6 @@ class MediaInsertSubscriber implements EventSubscriberInterface {
           if (is_null($parent->entity)) {
             continue;
           }
-
           // See if all service files have been created
           // for the parent paged content item.
           $readyToAggregate = \Drupal::database()->query('SELECT m.entity_id
@@ -101,6 +100,7 @@ class MediaInsertSubscriber implements EventSubscriberInterface {
             )
             LIMIT 1', [
               ':nid' => $parent->entity->id(),
+              ':original' => lehigh_islandora_get_tid_by_name('Original File', 'islandora_media_use'),
               ':service' => lehigh_islandora_get_tid_by_name('Service File', 'islandora_media_use'),
               ':paged' => lehigh_islandora_get_tid_by_name('Paged Content', 'islandora_models'),
           ])->fetchField();
