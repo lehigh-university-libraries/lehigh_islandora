@@ -40,7 +40,7 @@ class PagedContentAggregatedPdfTest extends ExistingSiteBase {
   
       $fs->copy($source_path, $destination_path, FileExists::Replace);
     }
-  
+    $this->failOnPhpWatchdogMessages = FALSE;
     $this->ignoreLoggedErrors();
   }
 
@@ -115,7 +115,9 @@ class PagedContentAggregatedPdfTest extends ExistingSiteBase {
     $mids = \Drupal::database()->query('SELECT m.entity_id
       FROM media__field_media_of m
       INNER JOIN media__field_media_use mu ON mu.entity_id = m.entity_id
-      WHERE field_media_of_target_id IN (:nids[])', [
+      WHERE field_media_of_target_id IN (:nids[])
+        AND field_media_use_target_id <> :tid', [
+          ':tid' => lehigh_islandora_get_tid_by_name('Original File', 'islandora_media_use'),
           ':nids[]' => $nids,
       ])->fetchCol();
 
