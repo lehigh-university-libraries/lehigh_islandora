@@ -118,7 +118,7 @@ class PagedContentAggregatedPdfTest extends ExistingSiteBase {
       INNER JOIN media__field_media_use mu ON mu.entity_id = m.entity_id
       WHERE field_media_of_target_id IN (:nids[])', [
           ':nids[]' => $nids,
-      ])->fetchField();
+      ])->fetchCol();
 
     foreach ($mids as $mid) {
       $media = Media::load($mid);
