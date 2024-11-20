@@ -97,6 +97,7 @@ class PagedContentAggregatedPdfTest extends ExistingSiteBase {
       ]);
     }
 
+    $pdfCreated = FALSE;
     foreach (range(0, 50) as $i) {
       $mid = \Drupal::database()->query('SELECT m.entity_id
         FROM media__field_media_of m
@@ -108,10 +109,13 @@ class PagedContentAggregatedPdfTest extends ExistingSiteBase {
       if ($mid) {
         $media = Media::load($mid);
         $this->assertEquals($parent->id() . ".pdf", $media->label());
+        $pdfCreated = TRUE;
         break;
       }
       sleep(5);
     }
+    $this->assertTrue($pdfCreated, 'PDF was created');
+
     $mids = \Drupal::database()->query('SELECT m.entity_id
       FROM media__field_media_of m
       INNER JOIN media__field_media_use mu ON mu.entity_id = m.entity_id
