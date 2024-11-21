@@ -313,23 +313,34 @@ function lehigh_islandora_media_presave(EntityInterface $media) {
   // set the original file to preservation master
   // so we can create original file being pdf
   // then service file being
-  if (($media->bundle() == 'file' || $media->bundle() == 'document') &&
-    !$media->field_media_use->isEmpty() &&
-    !$media->field_media_of->isEmpty() &&
-    !is_null($media->field_media_use->entity) &&
-    !is_null($media->field_media_of->entity)) {
-
-    $file_field = $media->bundle() === 'document' ? 'field_media_document' : 'field_media_file';
-    if (!$media->get($file_field)->isEmpty() &&
-      !is_null($media->get($file_field)->entity) &&
-      $media->field_media_use->entity->label() == 'Original File') {
-      $components = explode('.', $media->get($file_field)->entity->getFileUri());
-      $extension = array_pop($components);
-      if (in_array($extension, ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'])) {
-        $media->set('field_media_use', lehigh_islandora_get_tid_by_name('Preservation Master File', 'islandora_media_use'));
-      }
-    }
+  if (lehigh_islandora_media_is_ms_document($media) &&
+      $media->field_media_use->entity->label() === 'Original File') {
+    $media->set('field_media_use', lehigh_islandora_get_tid_by_name('Preservation Master File', 'islandora_media_use'));
   }
+}
+
+/**
+ * Check if a media entity contains a microsoft document.
+ */
+function lehigh_islandora_media_is_ms_document($media) {
+  if ($media->bundle() !== 'file' && $media->bundle() !== 'document') {
+    return FALSE;
+  }
+
+  if ($media->field_media_use->isEmpty() || is_null($media->field_media_use->entity)) {
+    return FALSE;
+  }
+
+  $file_field = $media->bundle() === 'document' ? 'field_media_document' : 'field_media_file';
+  $file = $media->get($file_field);
+  if ($file->isEmpty() || is_null($file->entity)) {
+    return FALSE;
+  }
+
+  $uri_components = explode('.', $file->entity->getFileUri());
+  $extension = array_pop($uri_components);
+
+  return in_array($extension, ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx']);
 }
 
 function lehigh_islandora_parent_needs_thumbnail($entity) : bool {

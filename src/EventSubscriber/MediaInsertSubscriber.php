@@ -54,7 +54,9 @@ class MediaInsertSubscriber implements EventSubscriberInterface {
         // todo: if zip, parse directory tree and create manifest
       }
       elseif ($media->field_media_use->entity->field_external_uri->uri === 'http://pcdm.org/use#PreservationMasterFile') {
-        $action_name = 'microsoft_document_to_pdf';
+        if (lehigh_islandora_media_is_ms_document($media)) {
+          $action_name = 'microsoft_document_to_pdf';
+        }
       }
       elseif ($media->field_media_use->entity->field_external_uri->uri === 'http://pcdm.org/use#OriginalFile') {
         if ($node->hasField('field_add_coverpage') &&
