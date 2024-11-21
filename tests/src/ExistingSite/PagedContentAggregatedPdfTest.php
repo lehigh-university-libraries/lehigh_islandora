@@ -2,54 +2,27 @@
 
 namespace Drupal\Tests\lehigh_islandora\ExistingSite;
 
-use Drupal\Core\File\FileExists;
-use Drupal\Core\File\FileSystemInterface;
 use Drupal\media\Entity\Media;
 use Drupal\user\Entity\User;
-use weitzman\DrupalTestTraits\ExistingSiteBase;
-use weitzman\DrupalTestTraits\Entity\MediaCreationTrait;
-use weitzman\DrupalTestTraits\Entity\NodeCreationTrait;
+
+require_once __DIR__ . '/DerivativeTestBase.php';
+use Drupal\Tests\lehigh_islandora\ExistingSite\DerivativeTestBase;
 
 /**
  * Test to ensure aggregated PDFs get created.
  */
-class PagedContentAggregatedPdfTest extends ExistingSiteBase {
-
-  use MediaCreationTrait;
-  use NodeCreationTrait;
+class PagedContentAggregatedPdfTest extends DerivativeTestBase {
 
   /**
    *
    */
   protected function setUp(): void {
-    parent::setUp();
-
-    // copy test files into place
     $source_dir = DRUPAL_ROOT . '/modules/contrib/lehigh_islandora/tests/assets/pc';
-    $destination_dir = 'public://tests';
-    $fs = \Drupal::service('file_system');
-    $fs->prepareDirectory($destination_dir, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
-    $files = scandir($source_dir);
-    foreach ($files as $file) {
-      if ($file === '.' || $file === '..') {
-        continue;
-      }
-  
-      $source_path = $source_dir . '/' . $file;
-      $destination_path = $destination_dir . '/' . $file;
-  
-      $fs->copy($source_path, $destination_path, FileExists::Replace);
-    }
-    $this->failOnPhpWatchdogMessages = FALSE;
-    $this->ignoreLoggedErrors();
+    parent::setupTest($source_dir);
   }
 
   /**
-   * Make sure we can create and view sub collections.
-   *
-   * @throws \Drupal\Core\Entity\EntityStorageException
-   * @throws \Drupal\Core\Entity\EntityMalformedException
-   * @throws \Behat\Mink\Exception\ExpectationException
+   * Run the test.
    */
   public function testAggregatedPdf() {
     $admin = User::load(1);
@@ -80,7 +53,7 @@ class PagedContentAggregatedPdfTest extends ExistingSiteBase {
       /** @var \Drupal\file\FileInterface $entity */
       $file = $file_storage->create([
         'uri' => "public://tests/$children.tiff",
-        'filename' => "$1.tiff",
+        'filename' => "$children.tiff",
         'filemime' => 'image/tiff',
       ]);
       $file->save();
@@ -98,7 +71,7 @@ class PagedContentAggregatedPdfTest extends ExistingSiteBase {
     }
 
     $pdfCreated = FALSE;
-    foreach (range(0, 50) as $i) {
+    foreach (range(0, 20) as $i) {
       $mid = \Drupal::database()->query('SELECT m.entity_id
         FROM media__field_media_of m
         INNER JOIN media__field_media_use mu ON mu.entity_id = m.entity_id
@@ -110,41 +83,17 @@ class PagedContentAggregatedPdfTest extends ExistingSiteBase {
         $media = Media::load($mid);
         $this->assertEquals($parent->id() . ".pdf", $media->label());
         $pdfCreated = TRUE;
+        $this->markEntityForCleanup($media->field_media_document->entity);
+        $this->markEntityForCleanup($media);
         break;
       }
       sleep(5);
     }
     $this->assertTrue($pdfCreated, 'PDF was created');
-
-    $mids = \Drupal::database()->query('SELECT m.entity_id
-      FROM media__field_media_of m
-      INNER JOIN media__field_media_use mu ON mu.entity_id = m.entity_id
-      WHERE field_media_of_target_id IN (:nids[])
-        AND field_media_use_target_id <> :tid', [
-          ':tid' => lehigh_islandora_get_tid_by_name('Original File', 'islandora_media_use'),
-          ':nids[]' => $nids,
-      ])->fetchCol();
-
-    foreach ($mids as $mid) {
-      $media = Media::load($mid);
-
-      $file = FALSE;
-      switch ($media->bundle()) {
-        case 'document':
-          $file = $media->field_media_document->entity;
-          break;
-        case 'file':
-          $file = $media->field_media_file->entity;
-          break;
-        case 'image':
-          $file = $media->field_media_image->entity;
-          break;
-      }
-      if ($file) {
-        $this->markEntityForCleanup($file);
-      }
-      $this->markEntityForCleanup($media);
-    }
+    $ignoreTids = [
+      lehigh_islandora_get_tid_by_name('Original File', 'islandora_media_use'),
+    ];
+    parent::cleanupDerivatives($nids, $ignoreTids);
   }
 
 }
