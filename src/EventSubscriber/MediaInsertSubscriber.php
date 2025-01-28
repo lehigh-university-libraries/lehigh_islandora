@@ -107,6 +107,7 @@ class MediaInsertSubscriber implements EventSubscriberInterface {
               ':paged' => lehigh_islandora_get_tid_by_name('Paged Content', 'islandora_models'),
           ])->fetchField();
           if ($readyToAggregate) {
+            lehigh_islandora_clear_disk_cache($parent->entity);
             $action_storage = \Drupal::entityTypeManager()->getStorage('action');
             $action = $action_storage->load('paged_content_created_aggregated_pdf');
             $action->execute([$parent->entity]);
