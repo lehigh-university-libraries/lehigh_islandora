@@ -138,6 +138,13 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
     // Only apply on the node canonical view or our collections/browse views.
     $route_name = $request->attributes->get('_route');
     if (in_array($route_name, ["view.browse.main", "entity.node.canonical"])) {
+      if ($request->attributes->has('node')) {
+        $node = $request->attributes->get('node');
+        if ($node instanceof \Drupal\node\NodeInterface && $node->bundle() !== 'islandora_object') {
+          return FALSE;
+        }
+      }
+
       return TRUE;
     }
 
