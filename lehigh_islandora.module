@@ -702,7 +702,7 @@ function lehigh_islandora_preprocess_node(&$vars) {
  * Implements hook_file_download().
  */
 function lehigh_islandora_file_download($uri) {
-  $embargoed = \Drupal::database()->query("SELECT fid FROM {file_managed} f
+  $nodes = \Drupal::database()->query("SELECT field_media_of_target_id, field_edtf_date_embargo_value FROM {file_managed} f
     LEFT JOIN {media__field_media_audio_file} a ON field_media_audio_file_target_id = f.fid
     LEFT JOIN {media__field_media_document} d ON field_media_document_target_id = f.fid
     LEFT JOIN {media__field_media_file} mf ON field_media_file_target_id = f.fid
@@ -714,13 +714,22 @@ function lehigh_islandora_file_download($uri) {
       m.entity_id = mf.entity_id OR
       m.entity_id = i.entity_id OR
       m.entity_id = v.entity_id
-    INNER JOIN {node__field_edtf_date_embargo} e ON e.entity_id = field_media_of_target_id
-    WHERE uri = :uri
-      AND field_edtf_date_embargo_value > NOW()", [
+    LEFT JOIN {node__field_edtf_date_embargo} e ON e.entity_id = field_media_of_target_id AND field_edtf_date_embargo_value > NOW()
+    WHERE uri = :uri", [
       ':uri' => $uri
-    ])->fetchField();
-  if ($embargoed) {
-    return -1;
+    ])->fetchAllKeyed();
+  $access = FALSE;
+  foreach ($nodes as $nid => $embargoed) {
+    if ($embargoed) {
+      return -1;
+    }
+    $node = Node::load($nid);
+    if ($node->access()) {
+      $access = TRUE;
+    }
+  }
+  if ($access) {
+    return 1;
   }
 
   return NULL;
