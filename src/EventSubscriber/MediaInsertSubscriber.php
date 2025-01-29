@@ -80,6 +80,9 @@ class MediaInsertSubscriber implements EventSubscriberInterface {
           if (is_null($parent->entity)) {
             continue;
           }
+          // wait for original file to be created
+          sleep(5);
+
           // See if all service files have been created
           // for the parent paged content item.
           $readyToAggregate = \Drupal::database()->query('SELECT m.entity_id
