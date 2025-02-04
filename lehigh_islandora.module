@@ -729,6 +729,9 @@ function lehigh_islandora_file_download($uri) {
     }
   }
   if ($access) {
+    if (substr($uri, -4) == '.pdf') {
+      return ['Content-Type' => 'application/pdf'];
+    }
     return 1;
   }
 
