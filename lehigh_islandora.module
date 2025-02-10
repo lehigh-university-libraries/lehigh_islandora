@@ -724,13 +724,17 @@ function lehigh_islandora_file_download($uri) {
       return -1;
     }
     $node = Node::load($nid);
-    if ($node->access()) {
+    if ($node && $node->access()) {
       $access = TRUE;
     }
   }
   if ($access) {
-    if (substr($uri, -4) == '.pdf') {
+    $ext = substr($uri, -4);
+    if ($ext == '.pdf') {
       return ['Content-Type' => 'application/pdf'];
+    }
+    elseif ($ext == '.jp2') {
+      return ['Content-Type' => 'image/jp2'];
     }
     return 1;
   }
