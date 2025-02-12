@@ -37,3 +37,58 @@ lehigh_islandora.access_request_form:
     _title: 'Access Request Form'
   requirements:
     _permission: 'access content'
+
+lehigh_islandora.pfaffs_cdm_redirects:
+  path: '/pfaffs/spr/{parent}/{child}/{zoom}/{x}/{y}'
+  defaults:
+    _title: 'Pfaffs Cdm Redirects'
+    _controller: '\Drupal\lehigh_islandora\Controller\PfaffsCdmRedirects::perform'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      parent:
+        type: integer
+      child:
+        type: integer
+      zoom:
+        type: integer
+      x:
+        type: integer
+      y:
+        type: integer
+
+
+lehigh_islandora.pfaffs_cdm_redirects_nyleader:
+  path: '/pfaffs/nyleader/{parent}/{child}/{zoom}/{x}/{y}'
+  defaults:
+    _title: 'Pfaffs Cdm Redirects'
+    _controller: '\Drupal\lehigh_islandora\Controller\PfaffsCdmRedirects::perform'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      parent:
+        type: integer
+      child:
+        type: integer
+      zoom:
+        type: integer
+      x:
+        type: integer
+      y:
+        type: integer
+
+lehigh_islandora.lehigh_islandora_vanity_fair:
+  path: '/pfaffs/vfair/{parent}/{child}'
+  defaults:
+    _title: 'Lehigh Islandora Vanity Fair'
+    _controller: '\Drupal\lehigh_islandora\Controller\LehighIslandoraVanityFair::perform'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      parent:
+        type: integer
+      child:
+        type: integer
