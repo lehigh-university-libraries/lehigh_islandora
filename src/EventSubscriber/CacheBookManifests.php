@@ -63,7 +63,7 @@ final class CacheBookManifests implements EventSubscriberInterface {
     $path = $request->getPathInfo();
     $file_path = self::getCachedFilePath($request, $path);
 
-    // don't save non-200 responses
+    // don't save non-200 responses.
     $response = $event->getResponse();
     if ($response->getStatusCode() !== 200) {
       return;
@@ -123,7 +123,6 @@ final class CacheBookManifests implements EventSubscriberInterface {
     $filesystem = \Drupal::service('file_system');
     $base_dir = 'private://iiif';
     $base_dir .= '/' . $request->getHost();
-
 
     // Make a subdirectory based on the current user's role IDs.
     $role_ids = \Drupal::currentUser()->getRoles();

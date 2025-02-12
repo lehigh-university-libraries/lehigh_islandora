@@ -267,13 +267,13 @@ function lehigh_islandora_media_delete(EntityInterface $media) {
  * Implements hook_ENTITY_TYPE_presave().
  */
 function lehigh_islandora_node_presave(EntityInterface $entity) {
-  // if we're saving a compound object
-  // see if it needs a thumbnail set
+  // If we're saving a compound object
+  // see if it needs a thumbnail set.
   if (lehigh_islandora_parent_needs_thumbnail($entity)) {
     lehigh_islandora_set_parent_thumbnail($entity);
   }
-  // or check if this node's parent is a compound object
-  // and check if the parent needs a thumbnail
+  // Or check if this node's parent is a compound object
+  // and check if the parent needs a thumbnail.
   elseif ($entity->hasField('field_member_of')) {
     foreach ($entity->field_member_of as $parent) {
       if (!is_null($parent->entity) && lehigh_islandora_parent_needs_thumbnail($parent->entity)) {
@@ -292,7 +292,7 @@ function lehigh_islandora_node_presave(EntityInterface $entity) {
       $alias->delete();
     }
   }
-  if (!lehigh_site_support_identify_collection($entity, true) &&
+  if (!lehigh_site_support_identify_collection($entity, TRUE) &&
     !is_null($entity->original) &&
     lehigh_site_support_identify_collection($entity->original, TRUE)) {
     $alias_storage = \Drupal::service('entity_type.manager')->getStorage('path_alias');
@@ -304,15 +304,14 @@ function lehigh_islandora_node_presave(EntityInterface $entity) {
   }
 }
 
-
 /**
  * Implements hook_ENTITY_TYPE_presave().
  */
 function lehigh_islandora_media_presave(EntityInterface $media) {
-  // for microsoft 365 documents
+  // For microsoft 365 documents
   // set the original file to preservation master
   // so we can create original file being pdf
-  // then service file being
+  // then service file being.
   if (lehigh_islandora_media_is_ms_document($media) &&
       $media->field_media_use->entity->label() === 'Original File') {
     $media->set('field_media_use', lehigh_islandora_get_tid_by_name('Preservation Master File', 'islandora_media_use'));
@@ -343,6 +342,9 @@ function lehigh_islandora_media_is_ms_document($media) {
   return in_array($extension, ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx']);
 }
 
+/**
+ *
+ */
 function lehigh_islandora_parent_needs_thumbnail($entity) : bool {
   return $entity->hasField('field_model')
     && $entity->hasField('field_thumbnail')
@@ -352,6 +354,9 @@ function lehigh_islandora_parent_needs_thumbnail($entity) : bool {
     && in_array($entity->field_model->entity->label(), ['Paged Content', 'Compound Object']);
 }
 
+/**
+ *
+ */
 function lehigh_islandora_set_parent_thumbnail($node) {
   $view = Views::getView('children');
   if (!is_object($view)) {
@@ -362,19 +367,19 @@ function lehigh_islandora_set_parent_thumbnail($node) {
   $view->setDisplay('block_1');
   $view->setArguments([$node->id()]);
   $view->execute();
-  // bail if there are no children
+  // Bail if there are no children.
   if (empty($view->result[0]->_entity)) {
     return;
   }
 
   $child = $view->result[0]->_entity;
-  // see if the child has a thumbnail set in the respective field
-  // and use it for this compount object parent's thumbnail
+  // See if the child has a thumbnail set in the respective field
+  // and use it for this compount object parent's thumbnail.
   if ($child->hasField('field_thumbnail') && !$child->field_thumbnail->isEmpty()) {
     $node->set('field_thumbnail', $child->field_thumbnail->target_id);
   }
   // otherwise, see if there's a thumbnail attached
-  // and use it for this compount object parent's thumbnail
+  // and use it for this compount object parent's thumbnail.
   else {
     $mid = \Drupal::database()->query("SELECT o.entity_id FROM media__field_media_of o
       INNER JOIN media__field_media_use u ON u.entity_id = o.entity_id
@@ -401,7 +406,7 @@ function lehigh_islandora_node_insert(EntityInterface $entity) {
     }
 
     $payload = [
-      'msg' => 'New submission: ' . $entity->toUrl('canonical', ['absolute' => TRUE])->toString()
+      'msg' => 'New submission: ' . $entity->toUrl('canonical', ['absolute' => TRUE])->toString(),
     ];
     try {
       \Drupal::httpClient()->post($webhook_url, [
@@ -411,7 +416,7 @@ function lehigh_islandora_node_insert(EntityInterface $entity) {
     }
     catch (RequestException $e) {
       \Drupal::logger('lehigh_islandora')->error('Failed to send message to Slack: @message', ['@message' => $e->getMessage()]);
-    } 
+    }
   }
 }
 
@@ -526,7 +531,7 @@ function lehigh_islandora_warm_cache($nid) {
     );
   }
 
-  // also cache the IIIF manifest
+  // Also cache the IIIF manifest.
   if ($node->hasField('field_model') && !$node->field_model->isEmpty()
     && !is_null($node->field_model->entity)) {
     $model = $node->field_model->entity->label();
@@ -686,7 +691,9 @@ function lehigh_islandora_form_node_islandora_object_form_alter(array &$form, Fo
   $form['#attached']['library'][] = 'lehigh_islandora/node-form';
 }
 
-
+/**
+ *
+ */
 function lehigh_islandora_preprocess_node(&$vars) {
   $node = $vars['node'];
   if ($vars['view_mode'] !== 'full' || $node->bundle() !== 'islandora_object') {
@@ -716,7 +723,7 @@ function lehigh_islandora_file_download($uri) {
       m.entity_id = v.entity_id
     LEFT JOIN {node__field_edtf_date_embargo} e ON e.entity_id = field_media_of_target_id AND field_edtf_date_embargo_value > NOW()
     WHERE uri = :uri", [
-      ':uri' => $uri
+      ':uri' => $uri,
     ])->fetchAllKeyed();
   $access = FALSE;
   foreach ($nodes as $nid => $embargoed) {

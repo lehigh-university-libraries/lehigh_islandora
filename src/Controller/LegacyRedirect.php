@@ -7,7 +7,6 @@ use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Redirect i7 pids to i2 node.
@@ -63,12 +62,6 @@ class LegacyRedirect extends ControllerBase {
       $route_parameters = $url->getRouteParameters();
 
       $options = [];
-      $format = $request->query->get('_format');
-      if ($format) {
-        $options['query'] = [
-          '_format' => $format,
-        ];
-      }
 
       return $this->redirect($route_name, $route_parameters, $options, 301);
     }

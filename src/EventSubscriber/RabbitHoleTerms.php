@@ -60,6 +60,7 @@ final class RabbitHoleTerms implements EventSubscriberInterface {
         case 'keywords':
           $facet = $term->bundle();
           break;
+
         case 'islandora_models':
           $facet = 'model';
           break;

@@ -41,4 +41,5 @@ class MediaInsertEvent extends Event {
   public function getMedia() {
     return $this->media;
   }
+
 }

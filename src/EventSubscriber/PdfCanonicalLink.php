@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\lehigh_islandora\EventSubscriber;
 
-use Drupal\Core\File\FileSystemInterface;
-use Drupal\node\Entity\Node;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -30,7 +26,7 @@ final class PdfCanonicalLink implements EventSubscriberInterface {
       return;
     }
 
-    // don't save non-200 responses
+    // don't save non-200 responses.
     $response = $event->getResponse();
     if ($response->getStatusCode() !== 200) {
       return;
@@ -48,7 +44,7 @@ final class PdfCanonicalLink implements EventSubscriberInterface {
       LEFT JOIN path_alias a ON a.path = CONCAT('/node/', field_media_of_target_id)
       WHERE uri = :uri", [
         ':uri' => $uri,
-    ])->fetchField();
+      ])->fetchField();
 
     if ($path) {
       $response->headers->set('Link', '<https://preserve.lehigh.edu/' . $path . '>; rel="canonical"');
@@ -78,6 +74,5 @@ final class PdfCanonicalLink implements EventSubscriberInterface {
 
     return FALSE;
   }
-
 
 }

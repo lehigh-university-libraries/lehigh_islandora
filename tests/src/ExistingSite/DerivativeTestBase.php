@@ -17,6 +17,9 @@ class DerivativeTestBase extends ExistingSiteBase {
   use MediaCreationTrait;
   use NodeCreationTrait;
 
+  /**
+   *
+   */
   protected function setUp(): void {
     parent::setUp();
   }
@@ -27,7 +30,7 @@ class DerivativeTestBase extends ExistingSiteBase {
   protected function setUpTest($source_path): void {
     parent::setUp();
 
-    // copy test files into place
+    // Copy test files into place.
     if (is_dir($source_path)) {
       $destination_dir = 'public://tests';
       $fs = \Drupal::service('file_system');
@@ -37,10 +40,10 @@ class DerivativeTestBase extends ExistingSiteBase {
         if ($file === '.' || $file === '..') {
           continue;
         }
-    
+
         $source = $source_path . '/' . $file;
         $destination_path = $destination_dir . '/' . $file;
-    
+
         $fs->copy($source, $destination_path, FileExists::Replace);
       }
     }
@@ -68,7 +71,7 @@ class DerivativeTestBase extends ExistingSiteBase {
         AND field_media_use_target_id NOT IN (:tids[])', [
           ':tids[]' => $tids,
           ':nids[]' => $nids,
-      ])->fetchCol();
+        ])->fetchCol();
 
     foreach ($mids as $mid) {
       $media = Media::load($mid);
@@ -78,10 +81,12 @@ class DerivativeTestBase extends ExistingSiteBase {
         case 'document':
           $file = $media->field_media_document->entity;
           break;
+
         case 'file':
         case 'fits_technical_metadata':
           $file = $media->field_media_file->entity;
           break;
+
         case 'image':
           $file = $media->field_media_image->entity;
           break;

@@ -6,7 +6,6 @@ use Drupal\media\Entity\Media;
 use Drupal\user\Entity\User;
 
 require_once __DIR__ . '/DerivativeTestBase.php';
-use Drupal\Tests\lehigh_islandora\ExistingSite\DerivativeTestBase;
 
 /**
  * Test to ensure aggregated PDFs get created.
@@ -78,7 +77,7 @@ class PagedContentAggregatedPdfTest extends DerivativeTestBase {
         WHERE field_media_use_target_id = :tid AND field_media_of_target_id = :nid', [
           ':tid' => lehigh_islandora_get_tid_by_name('Original File', 'islandora_media_use'),
           ':nid' => $parent->id(),
-      ])->fetchField();
+        ])->fetchField();
       if ($mid) {
         $media = Media::load($mid);
         $this->assertEquals($parent->id() . ".pdf", $media->label());

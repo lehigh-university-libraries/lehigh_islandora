@@ -51,7 +51,7 @@ class MediaInsertSubscriber implements EventSubscriberInterface {
 
       $node = $field_media_of->entity;
       if ($media->field_media_use->entity->field_external_uri->uri === 'http://vocab.getty.edu/page/aat/300027363') {
-        // todo: if zip, parse directory tree and create manifest
+        // @todo if zip, parse directory tree and create manifest
       }
       elseif ($media->field_media_use->entity->field_external_uri->uri === 'http://pcdm.org/use#PreservationMasterFile') {
         if (lehigh_islandora_media_is_ms_document($media)) {
@@ -65,10 +65,10 @@ class MediaInsertSubscriber implements EventSubscriberInterface {
           $media->bundle() == 'document') {
           $action_name = 'digital_document_add_coverpage';
         }
-        // todo: if zip, parse directory tree and create manifest
+        // @todo if zip, parse directory tree and create manifest
       }
       elseif ($media->field_media_use->entity->field_external_uri->uri === 'http://pcdm.org/use#ServiceFile') {
-        // bail if the parent node is not a page
+        // Bail if the parent node is not a page.
         if (!$node->hasField('field_model') ||
           $node->field_model->isEmpty() ||
           is_null($node->field_model->entity) ||
@@ -80,7 +80,7 @@ class MediaInsertSubscriber implements EventSubscriberInterface {
           if (is_null($parent->entity)) {
             continue;
           }
-          // wait for original file to be created
+          // Wait for original file to be created.
           sleep(5);
 
           // See if all service files have been created
@@ -108,7 +108,7 @@ class MediaInsertSubscriber implements EventSubscriberInterface {
               ':original' => lehigh_islandora_get_tid_by_name('Original File', 'islandora_media_use'),
               ':service' => lehigh_islandora_get_tid_by_name('Service File', 'islandora_media_use'),
               ':paged' => lehigh_islandora_get_tid_by_name('Paged Content', 'islandora_models'),
-          ])->fetchField();
+            ])->fetchField();
           if ($readyToAggregate) {
             lehigh_islandora_clear_disk_cache($parent->entity);
             $action_storage = \Drupal::entityTypeManager()->getStorage('action');
@@ -126,4 +126,5 @@ class MediaInsertSubscriber implements EventSubscriberInterface {
       $action_name = '';
     }
   }
+
 }

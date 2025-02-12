@@ -1,7 +1,6 @@
 <?php
 
-// from https://www.drupal.org/project/search_api_solr/issues/3459227#comment-15674804
-
+// From https://www.drupal.org/project/search_api_solr/issues/3459227#comment-15674804
 namespace Drupal\lehigh_islandora\Plugin\search_api\parse_mode;
 
 use Drupal\Component\Utility\Unicode;
@@ -41,14 +40,11 @@ class DirectBooleanOperators extends Direct {
     }
 
     // Test string
-    // "Drupal 10 theming" AND (views OR "content types") NOT "user authentication" + performance~2 OR security^2 && (module || plugin) !deprecated
-
+    // "Drupal 10 theming" AND (views OR "content types") NOT "user authentication" + performance~2 OR security^2 && (module || plugin) !deprecated.
     // Boolean operators and valid symbols.
-    // ['AND', 'OR', 'NOT', '&&', '||', '!', '+', '-'];
-
+    // ['AND', 'OR', 'NOT', '&&', '||', '!', '+', '-'];.
     // Valid group and scape chars.
-    // ['(', ')', '\'];
-
+    // ['(', ')', '\'];.
     // Normalize whitespace.
     $keys = preg_replace('/\s+/u', ' ', trim($keys));
 
@@ -59,12 +55,13 @@ class DirectBooleanOperators extends Direct {
     $escape_special_chars = ['{', '}', '[', ']', '^', '~', '*', '?', ':'];
 
     // Handle special characters outside of quotes.
-    $keys = preg_replace_callback('/("[^"]+")|\S+/', function($matches) use ($escape_special_chars) {
+    $keys = preg_replace_callback('/("[^"]+")|\S+/', function ($matches) use ($escape_special_chars) {
       if (isset($matches[1])) {
-        // This is a quoted phrase, don't modify anything inside
+        // This is a quoted phrase, don't modify anything inside.
         return $matches[0];
-      } else {
-        // This is not a quoted phrase, escape only the specified special characters
+      }
+      else {
+        // This is not a quoted phrase, escape only the specified special characters.
         $term = $matches[0];
         foreach ($escape_special_chars as $char) {
           $term = str_replace($char, '\\' . $char, $term);
@@ -73,11 +70,10 @@ class DirectBooleanOperators extends Direct {
       }
     }, $keys);
 
-
-    // @TODO
+    // @todo
     // Handle NegativeQueryProblems: Pure Negative Queries
     // https://cwiki.apache.org/confluence/display/SOLR/NegativeQueryProblems#NegativeQueryProblems-PureNegativeQueries
-
     return $keys;
   }
+
 }

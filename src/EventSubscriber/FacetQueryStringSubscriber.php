@@ -6,6 +6,9 @@ use Drupal\facets\Event\QueryStringCreated;
 use Drupal\facets\Event\FacetsEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ *
+ */
 class FacetQueryStringSubscriber implements EventSubscriberInterface {
 
   /**
@@ -30,4 +33,5 @@ class FacetQueryStringSubscriber implements EventSubscriberInterface {
     $events[FacetsEvents::QUERY_STRING_CREATED][] = ['onQueryStringCreated'];
     return $events;
   }
+
 }

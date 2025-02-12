@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Drupal\lehigh_islandora\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
@@ -63,16 +62,23 @@ class Altmetrics extends BlockBase {
     return $build;
   }
 
+  /**
+   *
+   */
   public function getCacheTags() {
     if ($node = \Drupal::routeMatch()->getParameter('node')) {
-      return Cache::mergeTags(parent::getCacheTags(), array('node:' . $node->id()));
+      return Cache::mergeTags(parent::getCacheTags(), ['node:' . $node->id()]);
     }
     else {
       return parent::getCacheTags();
     }
   }
 
+  /**
+   *
+   */
   public function getCacheContexts() {
-    return Cache::mergeContexts(parent::getCacheContexts(), array('route'));
+    return Cache::mergeContexts(parent::getCacheContexts(), ['route']);
   }
+
 }

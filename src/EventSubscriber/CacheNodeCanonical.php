@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\lehigh_islandora\EventSubscriber;
 
+use Drupal\node\NodeInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\node\Entity\Node;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -59,7 +60,7 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
       return;
     }
 
-    // don't save non-200 responses
+    // don't save non-200 responses.
     $response = $event->getResponse();
     if ($response->getStatusCode() !== 200) {
       return;
@@ -69,7 +70,7 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
     $file_path = self::getCachedFilePath($request, $path);
     $response->headers->set('Link', '<https://preserve.lehigh.edu/' . $path . '>; rel="canonical"');
 
-    // TODO: gate this on an internal IP too
+    // @todo gate this on an internal IP too
     $invalidating = $request->query->get('cache-warmer', FALSE);
     // If we're invalidating the cache
     // OR the cached file doesn't exist create it from the response.
@@ -140,7 +141,7 @@ final class CacheNodeCanonical implements EventSubscriberInterface {
     if (in_array($route_name, ["view.browse.main", "entity.node.canonical"])) {
       if ($request->attributes->has('node')) {
         $node = $request->attributes->get('node');
-        if ($node instanceof \Drupal\node\NodeInterface && $node->bundle() !== 'islandora_object') {
+        if ($node instanceof NodeInterface && $node->bundle() !== 'islandora_object') {
           return FALSE;
         }
       }
