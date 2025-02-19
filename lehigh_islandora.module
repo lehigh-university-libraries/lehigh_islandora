@@ -748,3 +748,19 @@ function lehigh_islandora_file_download($uri) {
 
   return NULL;
 }
+
+/**
+ * Implements hook_user_login().
+ */
+function lehigh_islandora_user_login($account) {
+  setcookie('DrupalAuth', '1', 0, '/');
+}
+
+/**
+ * Implements hook_user_logout().
+ */
+function lehigh_islandora_user_logout($account) {
+  $cookie_name = 'DrupalAuth';
+  setcookie($cookie_name, '', time() - 3600, '/');
+  unset($_COOKIE[$cookie_name]);
+}
