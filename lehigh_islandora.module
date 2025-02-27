@@ -753,7 +753,7 @@ function lehigh_islandora_file_download($uri) {
  * Implements hook_user_login().
  */
 function lehigh_islandora_user_login($account) {
-  setcookie('DrupalAuth', '1', 0, '/');
+  setcookie('DrupalAuth', '1', time()+864000, '/');
 }
 
 /**
