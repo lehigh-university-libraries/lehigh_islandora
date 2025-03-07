@@ -20,7 +20,7 @@
           $('#edit-field-part-detail-2-type').val('issue');
           $('#edit-field-part-detail-3-type').val('page');
           $('#edit-field-part-detail-0-title').attr('placeholder', 'Publication Title');
-          $('#edit-field-edtf-date-created-0-value').attr('placeholder', 'YYYY-MM-DD');
+          $('#edit-field-edtf-date-issued-0-value').attr('placeholder', 'YYYY-MM-DD');
           $('#edit-field-input-source-0-value').val('input_form');
           const published = document.getElementById('edit-status-value');
           published.checked = false;
