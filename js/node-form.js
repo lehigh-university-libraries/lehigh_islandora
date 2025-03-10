@@ -22,6 +22,7 @@
           $('#edit-field-part-detail-0-title').attr('placeholder', 'Publication Title');
           $('#edit-field-edtf-date-issued-0-value').attr('placeholder', 'YYYY-MM-DD');
           $('#edit-field-input-source-0-value').val('input_form');
+          $('#field-self-submission-creator-add-more-wrapper .field-add-more-submit').val("Add another person");
           const published = document.getElementById('edit-status-value');
           published.checked = false;
           const options = {
@@ -34,6 +35,10 @@
 
           // Find the input element by its ID
           const rights = document.getElementById('edit-field-rights-0-value');
+
+          $('select[name*="field_self_submission_creator"][name*="[inline_entity_form][field_identifier][0][attr0]"]')
+          .val('orcid')
+          .trigger('change');
 
           // Create a new select element
           const select = document.createElement('select');
@@ -53,60 +58,6 @@
           // Replace the input element with the new select element
           rights.parentNode.replaceChild(select, rights);
         });
-    }
-  };
-})(jQuery, Drupal);
-(function ($, Drupal) {
-  Drupal.behaviors.autoTaxonomyWorkflow = {
-    attach: function (context, settings) {
-      const existingButtonSelector = 'input[data-drupal-selector="edit-field-self-submission-creator-actions-ief-add-existing"]';
-      const newButtonSelector = 'input[data-drupal-selector="edit-field-self-submission-creator-actions-ief-add"]';
-      const cancelButtonSelector = 'input[name="ief-reference-cancel-field_self_submission_creator-form"]';
-      const searchResultsSelector = '.view-entity-browser-creators'; // Update as per actual search result container selector
-
-      $(newButtonSelector).attr("value", "Add a new person");
-      $(existingButtonSelector).attr("value", "Find an existing person in The Preserve");
-      return;
-
-      function clickAddExistingTerm() {
-        // Click "Add Existing Taxonomy Term" button to show search form
-        const existingButton = $(existingButtonSelector);
-        if (existingButton.length) {
-          existingButton[0].dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-        }
-      }
-
-      function checkForResults() {
-        // Check if search results are empty, wait if results haven't loaded yet
-        const searchResults = $(searchResultsSelector);
-        if (searchResults.length && searchResults.children().length === 0) {
-          clickCancel();
-        } else {
-          // Wait and check again if results aren't ready
-          setTimeout(checkForResults, 500);
-        }
-      }
-
-      function clickCancel() {
-        // Click the cancel button on the search form
-        const cancelButton = $(cancelButtonSelector);
-        if (cancelButton.length) {
-          cancelButton[0].dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-          setTimeout(clickAddNewTerm, 500); // Wait for UI to reset and re-enable buttons
-        }
-      }
-
-      function clickAddNewTerm() {
-        // Click "Add New Taxonomy Term" button after reset
-        const newButton = $(newButtonSelector);
-        if (newButton.length) {
-          newButton[0].dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-        }
-      }
-
-      // Start the workflow by clicking "Add Existing Taxonomy Term"
-        clickAddExistingTerm();
-        setTimeout(checkForResults, 10000);
     }
   };
 })(jQuery, Drupal);

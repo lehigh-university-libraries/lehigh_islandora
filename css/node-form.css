@@ -1,8 +1,8 @@
 .tabledrag-toggle-weight-wrapper,
-.field-actions,
 .field-multiple-table tbody tr td:not(:nth-child(2)),
 #edit-title-wrapper,
 .form-item--field-abstract-0-attr0,
+.field-actions,
 .js-filter-wrapper,
 label[for="edit-field-abstract-0-value-value"],
 .field-group-tabs-wrapper,
@@ -12,9 +12,19 @@ input[id$="-title"],
 #edit-field-part-detail-0-number,
 #edit-field-part-detail-0-type,
 #edit-field-input-source-wrapper,
-#edit-status-wrapper {
+#edit-status-wrapper,
+[class*="js-form-item-field-self-submission-creator-"][class*="-inline-entity-form-field-identifier-0-attr0"],
+[class*="js-form-item-field-self-submission-creator-"][class*="-inline-entity-form-field-identifier-0-value"] label {
   display: none !important;
 }
+#field-self-submission-creator-values label {
+  display: block;
+}
+
+.field-actions:has([data-drupal-selector="edit-field-self-submission-creator-add-more"]) {
+  display: block !important;
+}
+
 #edit-field-part-detail-0-title {
   display: initial !important;
   width: 410px !important;
